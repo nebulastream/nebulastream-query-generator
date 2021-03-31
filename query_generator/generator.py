@@ -17,10 +17,9 @@ class QueryGenerator:
     def generate(self) -> List[str]:
         self._inject_source_operators()
         while len(self._queries) < self._config.number_of_queries:
-            query_idx, query = self._choose_query_for_modification()
+            _, query = self._choose_query_for_modification()
             new_query = self._append_new_operators(query)
             self._queries.append(new_query)
-            self._randomly_remove_query(query_idx)
         self._inject_sink_operator()
         return [query.generate_code() for query in self._queries]
 

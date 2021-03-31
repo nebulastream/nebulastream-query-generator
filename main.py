@@ -12,5 +12,7 @@ if __name__ == '__main__':
     config = GeneratorConfig(possible_sources=[car_source], generators=[filter_generator, map_generator],
                              number_of_queries=100)
     queries = QueryGenerator(config).generate()
-    for query in queries:
-        print(query)
+    with open("generated_queries.txt", "w+") as f:
+        for query in queries:
+            f.write(query)
+            f.write("\n")
