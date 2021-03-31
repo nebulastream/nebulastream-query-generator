@@ -11,6 +11,8 @@ class Schema:
     string_fields: List[str]
     timestamp_fields: List[str]
 
+    def get_numerical_fields(self) -> List[str]:
+        return self.int_fields + self.double_fields
 
 class Operator(ABC):
     @abstractmethod

@@ -23,7 +23,7 @@ class FilterOperator(Operator):
     def generate_code(self) -> str:
         predicate_str = ""
         for (idx, predicate) in enumerate(self._predicates):
-            predicate_str += f"Attribute(\"{predicate.attribute}\") {predicate.condition} {predicate.value}"
+            predicate_str += f'Attribute("{predicate.attribute}") {predicate.condition} {predicate.value}'
             if idx != len(self._predicates) - 1:
                 predicate_str = f"{predicate_str} && "
 
@@ -37,6 +37,6 @@ class FilterFactory(OperatorFactory):
     def generate(self, input_schema: Schema) -> Operator:
         predicates = []
         for _ in range(self._max_number_of_predicates):
-            _, field = random_list_element(input_schema.int_fields)
+            _, field = random_list_element(input_schema.get_numerical_fields())
             predicates.append(Predicate(field, ">", "10"))
         return FilterOperator(predicates, input_schema)
