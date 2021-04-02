@@ -16,7 +16,7 @@ class QueryGenerator:
 
     def generate(self) -> List[str]:
         self._inject_source_operators()
-        while len(self._queries) < self._config.number_of_queries:
+        while len(self._queries) < self._config.numberOfQueries:
             _, query = self._choose_query_for_modification()
             new_query = self._append_new_operators(query)
             self._queries.append(new_query)
@@ -30,7 +30,7 @@ class QueryGenerator:
         return new_query
 
     def _inject_source_operators(self):
-        for source in self._config.possible_sources:
+        for source in self._config.possibleSources:
             self._queries.append(Query().add_operator(SourceOperator(source)))
 
     def _choose_query_for_modification(self) -> (int, Query):

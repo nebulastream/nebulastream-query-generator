@@ -18,4 +18,4 @@ class SinkFactory(OperatorFactory):
         pass
 
     def generate(self, input_schema: Schema) -> Operator:
-        return SinkOperator(input_schema, "FileSinkDescriptor::create(\"PATH\", \"TEXT_FORMAT\", \"OVERRIDE\")")
+        return SinkOperator(input_schema, "NullOutputSinkDescriptor::create()")

@@ -7,9 +7,9 @@ from query_generator.utils import random_list_element
 
 @dataclass
 class GeneratorConfig:
-    possible_sources: List[Schema]
+    possibleSources: List[Schema]
     generators: List[OperatorFactory]
-    number_of_queries: int
+    numberOfQueries: int
     max_operator_per_iteration: int = 2
 
     def choose_random_generator(self) -> OperatorFactory:
