@@ -14,11 +14,8 @@ class Predicate:
 
 class FilterOperator(Operator):
     def __init__(self, predicates: List[Predicate], schema: Schema):
+        super().__init__(schema)
         self._predicates = predicates
-        self._output_schema = schema
-
-    def output_schema(self) -> Schema:
-        return self._output_schema
 
     def generate_code(self) -> str:
         predicate_str = ""

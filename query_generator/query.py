@@ -20,4 +20,4 @@ class Query(Operator):
         return code
 
     def output_schema(self) -> Schema:
-        return self._operators[-1].output_schema()
+        return self._operators[-1].get_output_schema()

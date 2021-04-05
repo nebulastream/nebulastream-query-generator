@@ -24,10 +24,6 @@ equivalence_config:
   window_aggregation:
     tumbling_sliding_equality: true
     window_by_key_and_projection: true
-
-
-
-
 source_list:
   - stream_name: 'example'
     int_fields: [ 'id', 'val' ]
@@ -41,4 +37,3 @@ filter_list:
         type: ''
         max_value:
         min_value:
-

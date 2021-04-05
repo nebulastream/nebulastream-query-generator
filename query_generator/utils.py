@@ -10,3 +10,13 @@ def random_list_element(elements: List[Any]) -> (int, Any):
     """
     idx = random.randint(0, len(elements) - 1)
     return idx, elements[idx]
+
+
+def random_int_between(start: int, end: int) -> int:
+    """
+    Get a random integer between start and end
+    :param start: start value
+    :param end: end value
+    :return: random integer
+    """
+    return random.randint(start, end)

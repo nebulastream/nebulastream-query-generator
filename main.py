@@ -1,5 +1,7 @@
 import click
 import yaml
+
+from equivalence_rule.map_rule import MapRulesInitializer
 from query_generator.config import GeneratorConfig
 from query_generator.contracts import Schema
 from query_generator.filter import FilterFactory
@@ -22,7 +24,11 @@ def generateQueries(config_file):
                             timestamp_fields=sourceConf['timestamp_fields'], double_fields=sourceConf['double_fields'])
         possibleSources.append(source);
 
-
+    mparuleInit = MapRulesInitializer(possibleSources[0]);
+    output  = mparuleInit._mapRule.new_field_with_same_expression();
+    print(output.generate_code())
+    outputList  = mparuleInit._mapRule.complex_arithmetic_expression();
+    print(outputList[0].generate_code())
     filter_generator = FilterFactory(max_number_of_predicates=2)
     map_generator = MapFactory()
     config = GeneratorConfig(possibleSources=possibleSources, generators=[filter_generator, map_generator],

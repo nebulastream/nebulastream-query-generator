@@ -1,7 +1,7 @@
 from copy import deepcopy
 from dataclasses import dataclass
 
-from query_generator.contracts import OperatorFactory, Schema, Operator
+from query_generator.contracts import *
 from query_generator.utils import random_list_element
 
 
@@ -12,32 +12,23 @@ class Formula:
     right_operand: str
 
 
-@dataclass
-class Expression:
-    result_attribute: str
-    formula: Formula
-
-
 class MapOperator(Operator):
-    def __init__(self, expression: Expression, schema: Schema):
+    def __init__(self, expression: FieldAssignmentExpression, schema: Schema):
+        super(MapOperator, self).__init__(schema)
         self._expression = expression
-        self._output_schema = schema
-
-    def output_schema(self) -> Schema:
-        return self._output_schema
 
     def generate_code(self) -> str:
-        formula = self._expression.formula
-        expression_str = f'Attribute("{self._expression.result_attribute}") = Attribute("{formula.left_operand}") {formula.operator} Attribute("{formula.right_operand}")'
-        return f"map({expression_str})"
+        return f"map({self._expression.generate_code()})"
 
 
 class MapFactory(OperatorFactory):
     def generate(self, input_schema: Schema) -> Operator:
         output_schema = deepcopy(input_schema)
-        _, left_operand = random_list_element(input_schema.int_fields)
-        _, right_operand = random_list_element(input_schema.int_fields)
-        _, operator = random_list_element(["+", "-", "*"])
+        _, left_operand = random_list_element(output_schema.get_numerical_fields())
+        _, right_operand = random_list_element(output_schema.int_fields)
+        _, operator = random_list_element(List[ArithmeticOperators])
         result_variable = f"{left_operand}_{operator}_{right_operand}"
         output_schema.int_fields.append(result_variable)
-        return MapOperator(Expression(result_variable, Formula(left_operand, operator, right_operand)), output_schema)
+        return MapOperator(FieldAssignmentExpression(FieldAccessExpression(result_variable),
+                                                     ArithmeticExpression(left_operand, right_operand, operator)),
+                           output_schema)
