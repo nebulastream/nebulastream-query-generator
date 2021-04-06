@@ -2,11 +2,11 @@ import click
 import yaml
 
 from equivalence_rule.map_rule import MapRulesInitializer
-from query_generator.config import GeneratorConfig
-from query_generator.contracts import Schema
-from query_generator.filter import FilterFactory
+from generator_config.config import GeneratorConfig
+from utils.contracts import Schema
+from operator_generator.filter_generator import FilterFactory
 from query_generator.generator import QueryGenerator
-from query_generator.map import MapFactory
+from operator_generator.map_generator import MapGenerator
 
 
 @click.command()
@@ -46,7 +46,7 @@ def generateQueries(config_file):
         print(map.generate_code())
 
     filter_generator = FilterFactory(max_number_of_predicates=2)
-    map_generator = MapFactory()
+    map_generator = MapGenerator()
     config = GeneratorConfig(possibleSources=possibleSources, generators=[filter_generator, map_generator],
                              numberOfQueries=numberOfQueries)
     queries = QueryGenerator(config).generate()

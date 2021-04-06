@@ -1,17 +1,7 @@
-from dataclasses import dataclass
-from typing import List
-
-from query_generator.contracts import *
-from query_generator.utils import random_list_element
-
-
-class FilterOperator(Operator):
-    def __init__(self, predicate: LogicalExpression, schema: Schema):
-        super().__init__(schema)
-        self._predicate = predicate
-
-    def generate_code(self) -> str:
-        return f"filter({self._predicate.generate_code()})"
+from operators.filter_operator import FilterOperator
+from utils.contracts import OperatorFactory, Schema, Operator, LogicalExpression, FieldAccessExpression, \
+    ConstantExpression, LogicalOperators
+from utils.utils import random_list_element
 
 
 class FilterFactory(OperatorFactory):

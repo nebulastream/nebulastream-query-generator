@@ -1,6 +1,6 @@
 from typing import List
 
-from query_generator.contracts import Operator, Schema
+from utils.contracts import Operator, Schema
 
 
 class Query(Operator):

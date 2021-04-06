@@ -1,20 +1,11 @@
 from copy import deepcopy
-from dataclasses import dataclass
 
-from query_generator.contracts import *
-from query_generator.utils import random_list_element
-
-
-class MapOperator(Operator):
-    def __init__(self, expression: FieldAssignmentExpression, schema: Schema):
-        super(MapOperator, self).__init__(schema)
-        self._expression = expression
-
-    def generate_code(self) -> str:
-        return f"map({self._expression.generate_code()})"
+from operators.map_operator import MapOperator
+from utils.contracts import *
+from utils.utils import random_list_element
 
 
-class MapFactory(OperatorFactory):
+class MapGenerator(OperatorFactory):
 
     def generate(self, input_schema: Schema) -> Operator:
         output_schema = deepcopy(input_schema)

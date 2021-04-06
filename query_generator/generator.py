@@ -2,11 +2,11 @@ import random
 from copy import deepcopy
 from typing import List
 
-from query_generator.config import GeneratorConfig
+from generator_config.config import GeneratorConfig
 from query_generator.query import Query
-from query_generator.sink import SinkFactory
-from query_generator.source import SourceOperator
-from query_generator.utils import random_list_element
+from operator_generator.sink_generator import SinkFactory
+from operator_generator.source_generator import SourceOperator
+from utils.utils import random_list_element
 
 
 class QueryGenerator:

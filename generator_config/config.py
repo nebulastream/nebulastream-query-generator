@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import List
 
-from query_generator.contracts import Schema, OperatorFactory
-from query_generator.utils import random_list_element
+from utils.contracts import Schema, OperatorFactory
+from utils.utils import random_list_element
 
 
 @dataclass

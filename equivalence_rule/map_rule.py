@@ -1,9 +1,8 @@
-from typing import List
 from copy import deepcopy
 
-from query_generator.contracts import *
-from query_generator.map import MapOperator
-from query_generator.utils import *
+from utils.contracts import *
+from operator_generator.map_generator import MapOperator
+from utils.utils import *
 
 
 @dataclass
