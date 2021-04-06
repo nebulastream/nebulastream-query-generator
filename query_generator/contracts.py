@@ -51,7 +51,7 @@ class ArithmeticExpression(Expression):
     arithOp: ArithmeticOperators
 
     def generate_code(self) -> str:
-        return self.left.generate_code() + self.arithOp.value + self.right.generate_code()
+        return f'{self.left.generate_code()} {self.arithOp.value} {self.right.generate_code()}'
 
 
 @dataclass
@@ -61,7 +61,7 @@ class LogicalExpression(Expression):
     logicOp: LogicalOperators
 
     def generate_code(self) -> str:
-        return self.left.generate_code() + self.logicOp.value + self.right.generate_code()
+        return f'{self.left.generate_code()}{self.logicOp.value}{self.right.generate_code()}'
 
 
 @dataclass
@@ -86,11 +86,10 @@ class FieldAssignmentExpression(Expression):
     expression: Expression
 
     def generate_code(self) -> str:
-        return f'"{self.fieldAccessExpr.generate_code()}"="{self.expression.generate_code()}"'
+        return f'{self.fieldAccessExpr.generate_code()}={self.expression.generate_code()}'
 
 
 class Operator(ABC):
-    output_schema: Schema
 
     def __init__(self, schema: Schema):
         self.output_schema = schema

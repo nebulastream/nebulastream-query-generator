@@ -12,6 +12,16 @@ def random_list_element(elements: List[Any]) -> (int, Any):
     return idx, elements[idx]
 
 
+def shuffle_list(elements: List[Any]) -> List[Any]:
+    """
+    Shuffle the input list in random order
+    :param elements:
+    :return: reshuffled list
+    """
+    random.shuffle(elements)
+    return elements
+
+
 def random_int_between(start: int, end: int) -> int:
     """
     Get a random integer between start and end

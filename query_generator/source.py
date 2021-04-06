@@ -3,13 +3,10 @@ from query_generator.contracts import OperatorFactory, Schema, Operator
 
 class SourceOperator(Operator):
     def __init__(self, schema: Schema):
-        self._stream_schema = schema
-
-    def output_schema(self) -> Schema:
-        return self._stream_schema
+        super().__init__(schema)
 
     def generate_code(self) -> str:
-        return f"Query::from(\"{self._stream_schema.name}\")"
+        return f"Query::from(\"{self.output_schema.name}\")"
 
 
 class SourceFactory(OperatorFactory):
