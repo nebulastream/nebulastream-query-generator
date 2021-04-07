@@ -161,7 +161,7 @@ class MapRules:
         shuffledExpressionField = shuffle_list(randomly_ordered_map_expression.expressionFields);
         schema = randomly_ordered_map_expression.schema
 
-        "Compute the arithmetic expression"
+        #Compute the arithmetic expression
         initialExpression = ArithmeticExpression(FieldAccessExpression(shuffledExpressionField[0]),
                                                  FieldAccessExpression(shuffledExpressionField[1]), arithmeticOp)
         if len(shuffledExpressionField) > 2:

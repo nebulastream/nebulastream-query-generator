@@ -7,6 +7,14 @@ from utils.contracts import Schema
 from operator_generator_strategies.distinct_operator_strategies.distinct_filter_strategy import DistinctFilterStrategy
 from query_generator.generator import QueryGenerator
 from operator_generator_strategies.distinct_operator_strategies.distinct_map_strategy import DistinctMapStrategy
+from operator_generator_strategies.equivalent_operator_strategies.equivalent_filter_expression_strategy import \
+    EquivalentFilterExpressionStrategy
+from operator_generator_strategies.equivalent_operator_strategies.equivalent_filter_ordering_strategy import \
+    EquivalentFilterOrderingStrategy
+from operator_generator_strategies.equivalent_operator_strategies.equivalent_map_expression_strategy import \
+    EquivalentMapExpressionStrategy
+from operator_generator_strategies.equivalent_operator_strategies.equivalent_map_ordering_startegy import \
+    EquivalentMapOrderingStrategy
 
 
 @click.command()
@@ -25,10 +33,19 @@ def generateQueries(config_file):
                         timestamp_fields=sourceConf['timestamp_fields'], double_fields=sourceConf['double_fields'])
         possibleSources.append(source)
 
+    equivalent_filter_expression_strategy = EquivalentFilterExpressionStrategy()
+    equivalent_filter_ordering_strategy = EquivalentFilterOrderingStrategy()
+    equivalent_map_expression_strategy = EquivalentMapExpressionStrategy()
+    equivalent_map_ordering_strategy = EquivalentMapOrderingStrategy()
+
     filter_generator = DistinctFilterStrategy(max_number_of_predicates=2)
     map_generator = DistinctMapStrategy()
+
     config = GeneratorConfig(possibleSources=possibleSources,
-                             equivalentOperatorGenerators=[filter_generator, map_generator],
+                             equivalentOperatorGenerators=[equivalent_filter_expression_strategy,
+                                                           equivalent_filter_ordering_strategy,
+                                                           equivalent_map_expression_strategy,
+                                                           equivalent_map_ordering_strategy],
                              distinctOperatorGenerators=[filter_generator, map_generator],
                              numberOfQueries=numberOfQueries)
     queries = QueryGenerator(config).generate()

@@ -74,10 +74,10 @@ class ConstantExpression(Expression):
 
 @dataclass
 class FieldAccessExpression(Expression):
-    filedName: str
+    fieldName: str
 
     def generate_code(self) -> str:
-        return f'Attribute("{self.filedName}")'
+        return f'Attribute("{self.fieldName}")'
 
 
 @dataclass
