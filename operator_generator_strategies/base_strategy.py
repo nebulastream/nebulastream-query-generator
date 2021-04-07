@@ -4,7 +4,7 @@ from typing import List
 from utils.contracts import Schema, Operator
 
 
-class GeneratorRule(ABC):
+class BaseStrategy(ABC):
 
     @abstractmethod
     def generate(self, schema: Schema) -> List[Operator]:

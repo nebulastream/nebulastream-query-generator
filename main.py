@@ -1,12 +1,12 @@
 import click
 import yaml
 
-from operator_generator.equivalent_operators_rules.map_rule import MapRulesInitializer
+from operator_generator_strategies.equivalent_operator_strategies.map_rule import MapRulesInitializer
 from generator_config.config import GeneratorConfig
 from utils.contracts import Schema
-from operator_generator.random_operators_rules.filter_generator import FilterGenerator
+from operator_generator_strategies.distinct_operator_strategies.distinct_filter_strategy import DistinctFilterStrategy
 from query_generator.generator import QueryGenerator
-from operator_generator.random_operators_rules.map_generator import MapGenerator
+from operator_generator_strategies.distinct_operator_strategies.distinct_map_strategy import DistinctMapStrategy
 
 
 @click.command()
@@ -25,8 +25,8 @@ def generateQueries(config_file):
                         timestamp_fields=sourceConf['timestamp_fields'], double_fields=sourceConf['double_fields'])
         possibleSources.append(source)
 
-    filter_generator = FilterGenerator(max_number_of_predicates=2)
-    map_generator = MapGenerator()
+    filter_generator = DistinctFilterStrategy(max_number_of_predicates=2)
+    map_generator = DistinctMapStrategy()
     config = GeneratorConfig(possibleSources=possibleSources,
                              equivalentOperatorGenerators=[filter_generator, map_generator],
                              distinctOperatorGenerators=[filter_generator, map_generator],
