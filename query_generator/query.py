@@ -3,7 +3,7 @@ from typing import List
 from utils.contracts import Operator, Schema
 
 
-class Query(Operator):
+class Query():
     def __init__(self):
         self._operators: List[Operator] = []
 

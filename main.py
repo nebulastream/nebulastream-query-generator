@@ -1,12 +1,12 @@
 import click
 import yaml
 
-from equivalence_rule.map_rule import MapRulesInitializer
+from operator_generator.equivalent_operators_rules.map_rule import MapRulesInitializer
 from generator_config.config import GeneratorConfig
 from utils.contracts import Schema
-from operator_generator.filter_generator import FilterFactory
+from operator_generator.random_operators_rules.filter_generator import FilterGenerator
 from query_generator.generator import QueryGenerator
-from operator_generator.map_generator import MapGenerator
+from operator_generator.random_operators_rules.map_generator import MapGenerator
 
 
 @click.command()
@@ -25,34 +25,16 @@ def generateQueries(config_file):
                         timestamp_fields=sourceConf['timestamp_fields'], double_fields=sourceConf['double_fields'])
         possibleSources.append(source)
 
-    mparuleInit = MapRulesInitializer(possibleSources[0])
-
-    for i in range(1):
-        output = mparuleInit._mapRule.new_field_with_same_expression()
-        print(output.generate_code())
-
-    for i in range(1):
-        outputList = mparuleInit._mapRule.complex_arithmetic_expression()
-        print(outputList[0].generate_code())
-        print(outputList[1].generate_code())
-
-    for i in range(1):
-        outputList = mparuleInit._mapRule.map_operator_reordering()
-        print(outputList[0].generate_code())
-        print(outputList[1].generate_code())
-
-    for i in range(11):
-        map = mparuleInit._mapRule.map_expression_reordering()
-        print(map.generate_code())
-
-    filter_generator = FilterFactory(max_number_of_predicates=2)
+    filter_generator = FilterGenerator(max_number_of_predicates=2)
     map_generator = MapGenerator()
-    config = GeneratorConfig(possibleSources=possibleSources, generators=[filter_generator, map_generator],
+    config = GeneratorConfig(possibleSources=possibleSources,
+                             equivalentOperatorGenerators=[filter_generator, map_generator],
+                             distinctOperatorGenerators=[filter_generator, map_generator],
                              numberOfQueries=numberOfQueries)
     queries = QueryGenerator(config).generate()
     with open("generated_queries.txt", "w+") as f:
         for query in queries:
-            f.write(query)
+            f.write(query.generate_code())
             f.write("\n")
 
 

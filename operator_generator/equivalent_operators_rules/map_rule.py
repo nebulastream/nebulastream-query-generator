@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 from utils.contracts import *
-from operator_generator.map_generator import MapOperator
+from operator_generator.random_operators_rules.map_generator import MapOperator
 from utils.utils import *
 
 

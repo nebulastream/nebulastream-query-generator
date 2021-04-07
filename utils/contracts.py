@@ -109,13 +109,3 @@ class Operator(ABC):
         """
         pass
 
-
-class OperatorFactory(ABC):
-    @abstractmethod
-    def generate(self, input_schema: Schema) -> Operator:
-        """
-        Generate operator that works by consuming the input schema
-        :param input_schema: Fields accessible to operator
-        :return:
-        """
-        pass

@@ -26,7 +26,7 @@ equivalence_config:
     window_by_key_and_projection: true
 source_list:
   - stream_name: 'example'
-    int_fields: [ 'id', 'val' ]
+    int_fields: [ 'id', 'val', 'X', 'Y' ]
     string_fields: [ ]
     double_fields: [ ]
     timestamp_fields: [ ]
