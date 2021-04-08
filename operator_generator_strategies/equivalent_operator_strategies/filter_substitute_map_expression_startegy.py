@@ -23,7 +23,7 @@ class FilterSubstituteMapExpressionStrategy(BaseStrategy):
         :return:
         """
         if not self._substitutedFilterOperators:
-            self.__initializeFiltersWithSubstitutedMapExpression()
+            self.__initializeFiltersWithSubstitutedMapExpression(schema)
         _, followUpMap = random_list_element(self._substitutedFilterOperators)
         return [self._mapToSubstitute, followUpMap]
 

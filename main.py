@@ -1,8 +1,9 @@
 import click
 import yaml
 
-from operator_generator_strategies.equivalent_operator_strategies.map_rule import MapRulesInitializer
 from generator_config.config import GeneratorConfig
+from operator_generator_strategies.equivalent_operator_strategies.filter_equivalent_filter_strategy import \
+    FilterEquivalentFilterStrategy
 from operator_generator_strategies.equivalent_operator_strategies.filter_substitute_map_expression_startegy import \
     FilterSubstituteMapExpressionStrategy
 from operator_generator_strategies.equivalent_operator_strategies.map_create_new_field_strategy import \
@@ -46,6 +47,7 @@ def generateQueries(config_file):
     map_create_new_field_strategy = MapCreateNewFieldStrategy()
     map_substitute_map_expression_strategy = MapSubstituteMapExpressionStrategy()
     filter_substitute_map_expression_strategy = FilterSubstituteMapExpressionStrategy()
+    filter_equivalent_filter_strategy = FilterEquivalentFilterStrategy()
 
     filter_generator = DistinctFilterStrategy(max_number_of_predicates=2)
     map_generator = DistinctMapStrategy()
@@ -57,7 +59,8 @@ def generateQueries(config_file):
                                                            map_create_new_field_strategy,
                                                            map_expression_reorder_strategy,
                                                            map_substitute_map_expression_strategy,
-                                                           filter_substitute_map_expression_strategy],
+                                                           filter_substitute_map_expression_strategy,
+                                                           filter_equivalent_filter_strategy],
                              distinctOperatorGenerators=[filter_generator, map_generator],
                              numberOfQueries=numberOfQueries)
     queries = QueryGenerator(config).generate()

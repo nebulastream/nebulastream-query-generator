@@ -22,7 +22,7 @@ class MapSubstituteMapExpressionStrategy(BaseStrategy):
         :return:
         """
         if not self._substitutedMapOperators:
-            self.__initializeMapsWithComplexArithmeticExpressions()
+            self.__initializeMapsWithComplexArithmeticExpressions(schema)
         _, followUpMap = random_list_element(self._substitutedMapOperators)
         return [self._mapToSubstitute, followUpMap]
 
