@@ -1,12 +1,12 @@
 from copy import deepcopy
 
-from operator_generator_strategies.base_strategy import BaseStrategy
+from operator_generator_strategies.base_generator_strategy import BaseGeneratorStrategy
 from operators.map_operator import MapOperator
 from utils.contracts import *
 from utils.utils import random_list_element
 
 
-class DistinctMapStrategy(BaseStrategy):
+class DistinctMapGeneratorStrategy(BaseGeneratorStrategy):
 
     def generate(self, schema: Schema) -> List[Operator]:
         output_schema = deepcopy(schema)

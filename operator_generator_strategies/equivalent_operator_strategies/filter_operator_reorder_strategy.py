@@ -1,13 +1,13 @@
 from copy import deepcopy
 from typing import List
 
-from operator_generator_strategies.base_strategy import BaseStrategy
+from operator_generator_strategies.base_generator_strategy import BaseGeneratorStrategy
 from operators.filter_operator import FilterOperator
 from utils.contracts import Operator, LogicalOperators, LogicalExpression, FieldAccessExpression, ConstantExpression
 from utils.utils import *
 
 
-class FilterOperatorReorderStrategy(BaseStrategy):
+class FilterOperatorReorderGeneratorStrategy(BaseGeneratorStrategy):
 
     def __init__(self):
         self._filterOperators: List[FilterOperator] = []

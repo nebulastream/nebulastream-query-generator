@@ -1,14 +1,14 @@
 from copy import deepcopy
 from typing import List
 
-from operator_generator_strategies.base_strategy import BaseStrategy
+from operator_generator_strategies.base_generator_strategy import BaseGeneratorStrategy
 from operators.map_operator import MapOperator
 from utils.contracts import Schema, Operator, ArithmeticOperators, ArithmeticExpression, FieldAccessExpression, \
     FieldAssignmentExpression
 from utils.utils import random_list_element, shuffle_list
 
 
-class MapExpressionReorderStrategy(BaseStrategy):
+class MapExpressionReorderGeneratorStrategy(BaseGeneratorStrategy):
     def __init__(self):
         self._assignmentFieldName: str = None
         self._arithmeticOp: ArithmeticOperators = None

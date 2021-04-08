@@ -1,14 +1,14 @@
 from copy import deepcopy
 from typing import List
 
-from operator_generator_strategies.base_strategy import BaseStrategy
+from operator_generator_strategies.base_generator_strategy import BaseGeneratorStrategy
 from operators.map_operator import MapOperator
 from utils.contracts import Schema, Operator, FieldAssignmentExpression, FieldAccessExpression, ConstantExpression, \
     ArithmeticOperators, ArithmeticExpression
 from utils.utils import random_list_element, random_int_between
 
 
-class MapSubstituteMapExpressionStrategy(BaseStrategy):
+class MapSubstituteMapExpressionGeneratorStrategy(BaseGeneratorStrategy):
 
     def __init__(self):
         self._mapToSubstitute: MapOperator = None

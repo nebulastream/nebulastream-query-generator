@@ -1,27 +1,34 @@
+import random
+from typing import List
+
 import click
 import yaml
 
 from generator_config.config import GeneratorConfig
+from operator_generator_strategies.base_generator_strategy import BaseGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.filter_equivalent_filter_strategy import \
-    FilterEquivalentFilterStrategy
+    FilterEquivalentFilterGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.filter_substitute_map_expression_startegy import \
-    FilterSubstituteMapExpressionStrategy
+    FilterSubstituteMapExpressionGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.map_create_new_field_strategy import \
-    MapCreateNewFieldStrategy
+    MapCreateNewFieldGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.map_substitute_map_expression_strategy import \
-    MapSubstituteMapExpressionStrategy
+    MapSubstituteMapExpressionGeneratorStrategy
+from query_generator.query import Query
 from utils.contracts import Schema
-from operator_generator_strategies.distinct_operator_strategies.distinct_filter_strategy import DistinctFilterStrategy
+from operator_generator_strategies.distinct_operator_strategies.distinct_filter_strategy import \
+    DistinctFilterGeneratorStrategy
 from query_generator.generator import QueryGenerator
-from operator_generator_strategies.distinct_operator_strategies.distinct_map_strategy import DistinctMapStrategy
+from operator_generator_strategies.distinct_operator_strategies.distinct_map_strategy import \
+    DistinctMapGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.filter_expression_reorder_strategy import \
-    FilterExpressionReorderStrategy
+    FilterExpressionReorderGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.filter_operator_reorder_strategy import \
-    FilterOperatorReorderStrategy
+    FilterOperatorReorderGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.map_expression_reorder_strategy import \
-    MapExpressionReorderStrategy
+    MapExpressionReorderGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.map_operator_reorder_startegy import \
-    MapOperatorReorderStrategy
+    MapOperatorReorderGeneratorStrategy
 
 
 @click.command()
@@ -40,30 +47,47 @@ def generateQueries(config_file):
                         timestamp_fields=sourceConf['timestamp_fields'], double_fields=sourceConf['double_fields'])
         possibleSources.append(source)
 
-    filter_expression_reorder_strategy = FilterExpressionReorderStrategy()
-    filter_operator_reorder_strategy = FilterOperatorReorderStrategy()
-    map_expression_reorder_strategy = MapExpressionReorderStrategy()
-    map_operator_reorder_strategy = MapOperatorReorderStrategy()
-    map_create_new_field_strategy = MapCreateNewFieldStrategy()
-    map_substitute_map_expression_strategy = MapSubstituteMapExpressionStrategy()
-    filter_substitute_map_expression_strategy = FilterSubstituteMapExpressionStrategy()
-    filter_equivalent_filter_strategy = FilterEquivalentFilterStrategy()
+    filter_expression_reorder_strategy = FilterExpressionReorderGeneratorStrategy()
+    filter_operator_reorder_strategy = FilterOperatorReorderGeneratorStrategy()
+    map_expression_reorder_strategy = MapExpressionReorderGeneratorStrategy()
+    map_operator_reorder_strategy = MapOperatorReorderGeneratorStrategy()
+    map_create_new_field_strategy = MapCreateNewFieldGeneratorStrategy()
+    map_substitute_map_expression_strategy = MapSubstituteMapExpressionGeneratorStrategy()
+    filter_substitute_map_expression_strategy = FilterSubstituteMapExpressionGeneratorStrategy()
+    filter_equivalent_filter_strategy = FilterEquivalentFilterGeneratorStrategy()
 
-    filter_generator = DistinctFilterStrategy(max_number_of_predicates=2)
-    map_generator = DistinctMapStrategy()
+    filter_generator = DistinctFilterGeneratorStrategy(max_number_of_predicates=2)
+    map_generator = DistinctMapGeneratorStrategy()
+    distinctOperatorGeneratorStrategies = [filter_generator, map_generator]
+    equivalentOperatorGeneratorStrategies = [filter_expression_reorder_strategy, filter_operator_reorder_strategy,
+                                             map_expression_reorder_strategy, map_operator_reorder_strategy,
+                                             map_create_new_field_strategy, map_substitute_map_expression_strategy,
+                                             filter_substitute_map_expression_strategy,
+                                             filter_equivalent_filter_strategy]
 
-    config = GeneratorConfig(possibleSources=possibleSources,
-                             equivalentOperatorGenerators=[filter_expression_reorder_strategy,
-                                                           filter_operator_reorder_strategy,
-                                                           map_operator_reorder_strategy,
-                                                           map_create_new_field_strategy,
-                                                           map_expression_reorder_strategy,
-                                                           map_substitute_map_expression_strategy,
-                                                           filter_substitute_map_expression_strategy,
-                                                           filter_equivalent_filter_strategy],
-                             distinctOperatorGenerators=[filter_generator, map_generator],
-                             numberOfQueries=numberOfQueries)
-    queries = QueryGenerator(config).generate()
+    generateEquivalentQueries = configuration['generate_equivalent_queries']
+
+    numberOfQueryGroups = 1
+    if generateEquivalentQueries:
+        numberOfQueryGroups = configuration['equivalence_config']['no_of_equivalent_query_groups']
+
+    queries: List[Query] = []
+
+    numberOfQueries = numberOfQueries / numberOfQueryGroups
+    for i in range(numberOfQueryGroups):
+
+        equivalentOperatorGenerators: List[BaseGeneratorStrategy] = []
+        if generateEquivalentQueries:
+            equivalentOperatorGenerators = random.sample(equivalentOperatorGeneratorStrategies, 4)
+            distinctOperatorGeneratorStrategies = []
+
+        config = GeneratorConfig(possibleSources=possibleSources,
+                                 equivalentOperatorGenerators=equivalentOperatorGenerators,
+                                 distinctOperatorGenerators=distinctOperatorGeneratorStrategies,
+                                 numberOfQueries=numberOfQueries)
+        queries.extend(QueryGenerator(config).generate())
+
+    # Write queries into file
     with open("generated_queries.txt", "w+") as f:
         for query in queries:
             f.write(query.generate_code())

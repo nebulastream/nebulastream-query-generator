@@ -1,14 +1,14 @@
 from copy import deepcopy
 from typing import List
 
-from operator_generator_strategies.base_strategy import BaseStrategy
+from operator_generator_strategies.base_generator_strategy import BaseGeneratorStrategy
 from operators.filter_operator import FilterOperator
 from operators.map_operator import MapOperator
 from utils.contracts import *
 from utils.utils import *
 
 
-class FilterEquivalentFilterStrategy(BaseStrategy):
+class FilterEquivalentFilterGeneratorStrategy(BaseGeneratorStrategy):
     def __init__(self):
         self._equivalentFilterOperators: List[List[Operator]] = []
 
