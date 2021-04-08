@@ -4,7 +4,7 @@ max_no_of_operators: 4
 should_have: [ 'Window', 'Join' ]
 equivalence_config:
   apply_equivalence_rules: true
-  no_of_equivalent_query_groups: 4
+  no_of_equivalent_query_groups: 100
   map_rules:
     new_field_with_same_expression: true
     complex_arithmatic_expressions: true

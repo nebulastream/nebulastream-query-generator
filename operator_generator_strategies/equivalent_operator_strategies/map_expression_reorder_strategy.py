@@ -8,7 +8,7 @@ from utils.contracts import Schema, Operator, ArithmeticOperators, ArithmeticExp
 from utils.utils import random_list_element, shuffle_list
 
 
-class EquivalentMapExpressionStrategy(BaseStrategy):
+class MapExpressionReorderStrategy(BaseStrategy):
     def __init__(self):
         self._assignmentFieldName: str = None
         self._arithmeticOp: ArithmeticOperators = None

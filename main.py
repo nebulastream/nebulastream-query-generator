@@ -3,18 +3,24 @@ import yaml
 
 from operator_generator_strategies.equivalent_operator_strategies.map_rule import MapRulesInitializer
 from generator_config.config import GeneratorConfig
+from operator_generator_strategies.equivalent_operator_strategies.filter_substitute_map_expression_startegy import \
+    FilterSubstituteMapExpressionStrategy
+from operator_generator_strategies.equivalent_operator_strategies.map_create_new_field_strategy import \
+    MapCreateNewFieldStrategy
+from operator_generator_strategies.equivalent_operator_strategies.map_substitute_map_expression_strategy import \
+    MapSubstituteMapExpressionStrategy
 from utils.contracts import Schema
 from operator_generator_strategies.distinct_operator_strategies.distinct_filter_strategy import DistinctFilterStrategy
 from query_generator.generator import QueryGenerator
 from operator_generator_strategies.distinct_operator_strategies.distinct_map_strategy import DistinctMapStrategy
-from operator_generator_strategies.equivalent_operator_strategies.equivalent_filter_expression_strategy import \
-    EquivalentFilterExpressionStrategy
-from operator_generator_strategies.equivalent_operator_strategies.equivalent_filter_ordering_strategy import \
-    EquivalentFilterOrderingStrategy
-from operator_generator_strategies.equivalent_operator_strategies.equivalent_map_expression_strategy import \
-    EquivalentMapExpressionStrategy
-from operator_generator_strategies.equivalent_operator_strategies.equivalent_map_ordering_startegy import \
-    EquivalentMapOrderingStrategy
+from operator_generator_strategies.equivalent_operator_strategies.filter_expression_reorder_strategy import \
+    FilterExpressionReorderStrategy
+from operator_generator_strategies.equivalent_operator_strategies.filter_operator_reorder_strategy import \
+    FilterOperatorReorderStrategy
+from operator_generator_strategies.equivalent_operator_strategies.map_expression_reorder_strategy import \
+    MapExpressionReorderStrategy
+from operator_generator_strategies.equivalent_operator_strategies.map_operator_reorder_startegy import \
+    MapOperatorReorderStrategy
 
 
 @click.command()
@@ -33,19 +39,25 @@ def generateQueries(config_file):
                         timestamp_fields=sourceConf['timestamp_fields'], double_fields=sourceConf['double_fields'])
         possibleSources.append(source)
 
-    equivalent_filter_expression_strategy = EquivalentFilterExpressionStrategy()
-    equivalent_filter_ordering_strategy = EquivalentFilterOrderingStrategy()
-    equivalent_map_expression_strategy = EquivalentMapExpressionStrategy()
-    equivalent_map_ordering_strategy = EquivalentMapOrderingStrategy()
+    filter_expression_reorder_strategy = FilterExpressionReorderStrategy()
+    filter_operator_reorder_strategy = FilterOperatorReorderStrategy()
+    map_expression_reorder_strategy = MapExpressionReorderStrategy()
+    map_operator_reorder_strategy = MapOperatorReorderStrategy()
+    map_create_new_field_strategy = MapCreateNewFieldStrategy()
+    map_substitute_map_expression_strategy = MapSubstituteMapExpressionStrategy()
+    filter_substitute_map_expression_strategy = FilterSubstituteMapExpressionStrategy()
 
     filter_generator = DistinctFilterStrategy(max_number_of_predicates=2)
     map_generator = DistinctMapStrategy()
 
     config = GeneratorConfig(possibleSources=possibleSources,
-                             equivalentOperatorGenerators=[equivalent_filter_expression_strategy,
-                                                           equivalent_filter_ordering_strategy,
-                                                           equivalent_map_expression_strategy,
-                                                           equivalent_map_ordering_strategy],
+                             equivalentOperatorGenerators=[filter_expression_reorder_strategy,
+                                                           filter_operator_reorder_strategy,
+                                                           map_operator_reorder_strategy,
+                                                           map_create_new_field_strategy,
+                                                           map_expression_reorder_strategy,
+                                                           map_substitute_map_expression_strategy,
+                                                           filter_substitute_map_expression_strategy],
                              distinctOperatorGenerators=[filter_generator, map_generator],
                              numberOfQueries=numberOfQueries)
     queries = QueryGenerator(config).generate()

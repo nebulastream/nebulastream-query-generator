@@ -7,7 +7,7 @@ from utils.contracts import Operator, LogicalOperators, LogicalExpression, Field
 from utils.utils import *
 
 
-class EquivalentFilterOrderingStrategy(BaseStrategy):
+class FilterOperatorReorderStrategy(BaseStrategy):
 
     def __init__(self):
         self._filterOperators: List[FilterOperator] = []

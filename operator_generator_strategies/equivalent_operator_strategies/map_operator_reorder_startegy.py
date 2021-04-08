@@ -8,7 +8,7 @@ from utils.contracts import Schema, Operator, ArithmeticOperators, FieldAccessEx
 from utils.utils import random_list_element, random_int_between, shuffle_list
 
 
-class EquivalentMapOrderingStrategy(BaseStrategy):
+class MapOperatorReorderStrategy(BaseStrategy):
     def __init__(self):
         self._mapOperators: List[MapOperator] = None
 
