@@ -14,7 +14,8 @@ class DistinctFilterGeneratorStrategy(BaseGeneratorStrategy):
 
     def generate(self, schema: Schema) -> List[Operator]:
         _, field = random_list_element(schema.get_numerical_fields())
-        _, operator = random_list_element(list(LogicalOperators))
+        _, operator = random_list_element(
+            [LogicalOperators.lt, LogicalOperators.gt, LogicalOperators.lte, LogicalOperators.gte])
         filter_operator = FilterOperator(
             LogicalExpression(FieldAccessExpression(field), ConstantExpression("10"), operator), schema)
         return [filter_operator]

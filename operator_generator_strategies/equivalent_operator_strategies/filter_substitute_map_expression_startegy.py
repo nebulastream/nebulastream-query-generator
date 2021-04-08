@@ -44,7 +44,8 @@ class FilterSubstituteMapExpressionGeneratorStrategy(BaseGeneratorStrategy):
         arithExpression2 = ArithmeticExpression(FieldAccessExpression(assignmentFieldName1),
                                                 ConstantExpression(str(contValue)), arithOperation)
 
-        _, logicalOperation = random_list_element(list(LogicalOperators))
+        _, logicalOperation = random_list_element(
+            [LogicalOperators.lt, LogicalOperators.gt, LogicalOperators.lte, LogicalOperators.gte])
 
         followUpFilter1 = FilterOperator(
             LogicalExpression(FieldAccessExpression(assignmentFieldName1), arithExpression1, logicalOperation),

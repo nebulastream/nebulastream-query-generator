@@ -7,4 +7,4 @@ class SinkOperator(Operator):
         self._sink_reference = sink_reference
 
     def generate_code(self) -> str:
-        return f"addSink({self._sink_reference})"
+        return f"sink({self._sink_reference});"
