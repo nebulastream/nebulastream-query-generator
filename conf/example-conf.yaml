@@ -1,0 +1,10 @@
+no_queries: 1001
+generate_equivalent_queries: true
+equivalence_config:
+  no_of_equivalent_query_groups: 100
+source_list:
+  - stream_name: 'example'
+    int_fields: [ 'id', 'val', 'X', 'Y' ]
+    string_fields: [ ]
+    double_fields: [ ]
+    timestamp_fields: [ ]
