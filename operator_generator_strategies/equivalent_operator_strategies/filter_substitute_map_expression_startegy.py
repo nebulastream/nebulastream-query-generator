@@ -19,8 +19,8 @@ class FilterSubstituteMapExpressionGeneratorStrategy(BaseGeneratorStrategy):
         """
         This method is responsible for generating two map operators for simulating complex arithmetic expressions
         Example:  map(y = 30).map(x = y* z) vs map(y = 30).map(x= 30*z)
-        :param schema:
-        :return:
+        :param schema: schema to be used for generating the operators
+        :return: the list of operators
         """
         if not self._substitutedFilterOperators:
             self.__initializeFiltersWithSubstitutedMapExpression(schema)

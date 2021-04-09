@@ -1,14 +1,12 @@
 import random
 from typing import List, Any
 
-from utils.contracts import Schema
-
 
 def random_list_element(elements: List[Any]) -> (int, Any):
     """
     Choose a random element from list and return it along with its ID
-    :param elements:
-    :return:
+    :param elements: the list of elements from which random values needed to be selected
+    :return: index of the element, element value
     """
     idx = random.randint(0, len(elements) - 1)
     return idx, elements[idx]
@@ -31,7 +29,7 @@ def random_field_name(elements: List[str], ignore_new: bool = True) -> str:
 def shuffle_list(elements: List[Any]) -> List[Any]:
     """
     Shuffle the input list in random order
-    :param elements:
+    :param elements: List to be reshuffled
     :return: reshuffled list
     """
     random.shuffle(elements)

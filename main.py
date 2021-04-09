@@ -29,16 +29,16 @@ from operator_generator_strategies.equivalent_operator_strategies.map_expression
     MapExpressionReorderGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.map_operator_reorder_startegy import \
     MapOperatorReorderGeneratorStrategy
+from utils.utils import random_list_element
 
 
 @click.command()
 @click.option('-cf', '--config-file', help='Location of the configuration file.', type=click.STRING)
-def generateQueries(config_file):
+def run(config_file):
     print("Loading configurations")
     file = open(config_file, 'r')
     configuration = yaml.load(file, yaml.Loader)
     print(configuration)
-    numberOfQueries = configuration['no_queries']
 
     possibleSources = []
     for sourceConf in configuration['source_list']:
@@ -72,20 +72,23 @@ def generateQueries(config_file):
         numberOfQueryGroups = configuration['equivalence_config']['no_of_equivalent_query_groups']
 
     queries: List[Query] = []
-
-    numberOfQueries = numberOfQueries / numberOfQueryGroups
+    numberOfQueries = configuration['no_queries']
+    numberOfQueriesPerGroup = int(numberOfQueries / numberOfQueryGroups)
+    # Iterate over number of query groups
     for i in range(numberOfQueryGroups):
+        # NOTE: this won't work when we need a binary operator in the query
+        _, sourceToUse = random_list_element(possibleSources)
+        generatedQueries = generateQueries(generateEquivalentQueries, numberOfQueriesPerGroup, sourceToUse,
+                                           equivalentOperatorGeneratorStrategies, distinctOperatorGeneratorStrategies)
+        queries.extend(generatedQueries)
 
-        equivalentOperatorGenerators: List[BaseGeneratorStrategy] = []
-        if generateEquivalentQueries:
-            equivalentOperatorGenerators = random.sample(equivalentOperatorGeneratorStrategies, 4)
-            distinctOperatorGeneratorStrategies = []
-
-        config = GeneratorConfig(possibleSources=possibleSources,
-                                 equivalentOperatorGenerators=equivalentOperatorGenerators,
-                                 distinctOperatorGenerators=distinctOperatorGeneratorStrategies,
-                                 numberOfQueries=numberOfQueries)
-        queries.extend(QueryGenerator(config).generate())
+    # Populate remaining queries
+    numberOfQueriesPerGroup = numberOfQueries - (numberOfQueriesPerGroup * numberOfQueryGroups)
+    # NOTE: this won't work when we need a binary operator in the query
+    _, sourceToUse = random_list_element(possibleSources)
+    generatedQueries = generateQueries(generateEquivalentQueries, numberOfQueriesPerGroup, sourceToUse,
+                                       equivalentOperatorGeneratorStrategies, distinctOperatorGeneratorStrategies)
+    queries.extend(generatedQueries)
 
     # Write queries into file
     with open("generated_queries.txt", "w+") as f:
@@ -94,5 +97,17 @@ def generateQueries(config_file):
             f.write("\n")
 
 
+def generateQueries(generateEquivalentQueries: bool, numberOfQueriesPerGroup: int, sourceToUse: Schema,
+                    equivalentOperatorGeneratorStrategies: List[BaseGeneratorStrategy],
+                    distinctOperatorGeneratorStrategies: List[BaseGeneratorStrategy]) -> List[Query]:
+    equivalentOperatorGenerators: List[BaseGeneratorStrategy] = []
+    if generateEquivalentQueries:
+        equivalentOperatorGenerators = random.sample(equivalentOperatorGeneratorStrategies, 4)
+        distinctOperatorGeneratorStrategies = []
+
+    return QueryGenerator(sourceToUse, numberOfQueriesPerGroup, equivalentOperatorGenerators,
+                          distinctOperatorGeneratorStrategies).generate()
+
+
 if __name__ == '__main__':
-    generateQueries()
+    run()

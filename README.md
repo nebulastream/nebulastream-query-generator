@@ -3,9 +3,9 @@ This project is used for generating random valid NES queries based on given conf
 
 # Installation
 
-Please make sure to install following dependencies before working with this project:
+The [requirements.txt](requirements.txt) file should list all Python libraries that this project depend on, and they will be installed using
 
-`pip install click`
+`pip install -r requirements.txt`
 
 # How To Run
 

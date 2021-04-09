@@ -10,6 +10,7 @@ class BaseGeneratorStrategy(ABC):
     def generate(self, schema: Schema) -> List[Operator]:
         """
         Generate a set of connected operators that works by consuming the schema
-        :return: list of connected operators
+        :param schema: schema to be used for generating the operators
+        :return: list of operators
         """
         pass

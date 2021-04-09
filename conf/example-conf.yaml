@@ -1,4 +1,4 @@
-no_queries: 1000
+no_queries: 1001
 generate_equivalent_queries: true
 equivalence_config:
   no_of_equivalent_query_groups: 100
