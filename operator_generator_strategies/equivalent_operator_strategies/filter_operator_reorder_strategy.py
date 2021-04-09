@@ -3,7 +3,8 @@ from typing import List
 
 from operator_generator_strategies.base_generator_strategy import BaseGeneratorStrategy
 from operators.filter_operator import FilterOperator
-from utils.contracts import Operator, LogicalOperators, LogicalExpression, FieldAccessExpression, ConstantExpression
+from utils.contracts import Operator, LogicalOperators, LogicalExpression, FieldAccessExpression, ConstantExpression, \
+    Schema
 from utils.utils import *
 
 

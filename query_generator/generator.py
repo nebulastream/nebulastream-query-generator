@@ -9,6 +9,7 @@ from operator_generator_strategies.distinct_operator_strategies.distinct_sink_st
     DistinctSinkGeneratorStrategy
 from operator_generator_strategies.distinct_operator_strategies.distinct_source_strategy import SourceOperator, \
     DistinctSourceGeneratorStrategy
+from utils.contracts import Schema
 from utils.utils import *
 
 
