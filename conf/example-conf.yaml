@@ -1,39 +1,10 @@
 no_queries: 1000
-min_no_of_operators: 2
-max_no_of_operators: 4
-should_have: [ 'Window', 'Join' ]
 generate_equivalent_queries: true
 equivalence_config:
   no_of_equivalent_query_groups: 100
-  map_rules:
-    new_field_with_same_expression: true
-    complex_arithmatic_expressions: true
-    expressions_reorder: true
-    map_ordering: true
-  filter_rule:
-    similar_filters: true
-    expression_order: true
-    filter_ordering: true
-  project_rules:
-    project_order: true
-  union_rule:
-    union_order: true
-  window_join_rule:
-    join_order: true
-    mway_join_order: true
-  window_aggregation:
-    tumbling_sliding_equality: true
-    window_by_key_and_projection: true
 source_list:
   - stream_name: 'example'
     int_fields: [ 'id', 'val', 'X', 'Y' ]
     string_fields: [ ]
     double_fields: [ ]
     timestamp_fields: [ ]
-filter_list:
-  - on_schema: a
-    on_fields:
-      - filed_name: 'id'
-        type: ''
-        max_value:
-        min_value:
