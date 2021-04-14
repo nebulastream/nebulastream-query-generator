@@ -6,7 +6,7 @@ from operators.filter_operator import FilterOperator
 from operators.map_operator import MapOperator
 from utils.contracts import Operator, Schema, FieldAssignmentExpression, FieldAccessExpression, ConstantExpression, \
     ArithmeticOperators, ArithmeticExpression, LogicalExpression, LogicalOperators
-from utils.utils import random_list_element, random_int_between
+from utils.utils import random_list_element, random_int_between, random_field_name
 
 
 class FilterSubstituteMapExpressionGeneratorStrategy(BaseGeneratorStrategy):
@@ -30,13 +30,13 @@ class FilterSubstituteMapExpressionGeneratorStrategy(BaseGeneratorStrategy):
     def __initializeFiltersWithSubstitutedMapExpression(self, schema: Schema):
         schemaCopy = deepcopy(schema)
         numFields = schemaCopy.get_numerical_fields()
-        _, originalAssignmentFieldName = random_list_element(numFields)
+        originalAssignmentFieldName = random_field_name(numFields)
         numFields.remove(originalAssignmentFieldName)
         contValue = random_int_between(1, 10)
         baseMap = MapOperator(FieldAssignmentExpression(FieldAccessExpression(originalAssignmentFieldName),
                                                         ConstantExpression(str(contValue))), schema)
 
-        _, assignmentFieldName1 = random_list_element(numFields)
+        assignmentFieldName1 = random_field_name(numFields)
         _, arithOperation = random_list_element(list(ArithmeticOperators))
 
         arithExpression1 = ArithmeticExpression(FieldAccessExpression(assignmentFieldName1),

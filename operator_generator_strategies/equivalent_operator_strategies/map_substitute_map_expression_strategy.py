@@ -5,7 +5,7 @@ from operator_generator_strategies.base_generator_strategy import BaseGeneratorS
 from operators.map_operator import MapOperator
 from utils.contracts import Schema, Operator, FieldAssignmentExpression, FieldAccessExpression, ConstantExpression, \
     ArithmeticOperators, ArithmeticExpression
-from utils.utils import random_list_element, random_int_between
+from utils.utils import random_list_element, random_int_between, random_field_name
 
 
 class MapSubstituteMapExpressionGeneratorStrategy(BaseGeneratorStrategy):
@@ -29,13 +29,13 @@ class MapSubstituteMapExpressionGeneratorStrategy(BaseGeneratorStrategy):
     def __initializeMapsWithComplexArithmeticExpressions(self, schema: Schema):
         schemaCopy = deepcopy(schema)
         numFields = schemaCopy.get_numerical_fields()
-        _, originalAssignmentFieldName = random_list_element(numFields)
+        originalAssignmentFieldName = random_field_name(numFields)
         numFields.remove(originalAssignmentFieldName)
         contValue = random_int_between(1, 10)
         baseMap = MapOperator(FieldAssignmentExpression(FieldAccessExpression(originalAssignmentFieldName),
                                                         ConstantExpression(str(contValue))), schema)
 
-        _, assignmentFieldName1 = random_list_element(numFields)
+        assignmentFieldName1 = random_field_name(numFields)
         _, arithOperation = random_list_element(list(ArithmeticOperators))
         expression1 = ArithmeticExpression(FieldAccessExpression(assignmentFieldName1),
                                            FieldAccessExpression(originalAssignmentFieldName), arithOperation)

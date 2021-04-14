@@ -59,11 +59,14 @@ def run(config_file):
     filter_generator = DistinctFilterGeneratorStrategy(max_number_of_predicates=2)
     map_generator = DistinctMapGeneratorStrategy()
     distinctOperatorGeneratorStrategies = [filter_generator, map_generator]
-    equivalentOperatorGeneratorStrategies = [filter_expression_reorder_strategy, filter_operator_reorder_strategy,
-                                             map_expression_reorder_strategy, map_operator_reorder_strategy,
-                                             map_create_new_field_strategy, map_substitute_map_expression_strategy,
-                                             filter_substitute_map_expression_strategy,
-                                             filter_equivalent_filter_strategy]
+    equivalentOperatorGeneratorStrategies = [
+        map_expression_reorder_strategy,
+        map_operator_reorder_strategy,
+        map_create_new_field_strategy, map_substitute_map_expression_strategy,
+        filter_substitute_map_expression_strategy,
+        filter_expression_reorder_strategy, filter_operator_reorder_strategy,
+        filter_equivalent_filter_strategy
+    ]
 
     generateEquivalentQueries = configuration['generate_equivalent_queries']
 

@@ -33,9 +33,9 @@ class FilterEquivalentFilterGeneratorStrategy(BaseGeneratorStrategy):
         intFields = schemaCopy.int_fields
 
         if option == 1:
-            _, assignmentFieldName1 = random_list_element(intFields)
+            assignmentFieldName1 = random_field_name(intFields)
             intFields.remove(assignmentFieldName1)
-            _, assignmentFieldName2 = random_list_element(intFields)
+            assignmentFieldName2 = random_field_name(intFields)
             _, arithOperation = random_list_element(list(ArithmeticOperators))
 
             _, logicalOperation = random_list_element(
@@ -53,7 +53,7 @@ class FilterEquivalentFilterGeneratorStrategy(BaseGeneratorStrategy):
                 self._equivalentFilterOperators.append([filterOp])
         else:
 
-            _, assignmentField = random_list_element(intFields)
+            assignmentField = random_field_name(intFields)
             contValue = 10
             arithExpression = ArithmeticExpression(ConstantExpression(str(contValue)),
                                                    FieldAccessExpression(assignmentField), ArithmeticOperators.Mul)

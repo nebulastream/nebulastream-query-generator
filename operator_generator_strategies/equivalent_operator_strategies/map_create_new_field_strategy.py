@@ -38,7 +38,7 @@ class MapCreateNewFieldGeneratorStrategy(BaseGeneratorStrategy):
                                           FieldAccessExpression(assignmentFieldName2), arithOperation)
         mapsWithNewFieldAndSameExpression = []
         for i in range(10):
-            newFiledName = f"{originalAssignmentFieldName}{random_int_between(1, 10)}"
+            newFiledName = f"NEW_{originalAssignmentFieldName}{random_int_between(1, 10)}"
             updateSchema = deepcopy(schema)
             updateSchema.int_fields.append(newFiledName)
             mapWithNewFieldAndSameExpression = MapOperator(

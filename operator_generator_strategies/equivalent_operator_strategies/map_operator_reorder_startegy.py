@@ -5,7 +5,7 @@ from operator_generator_strategies.base_generator_strategy import BaseGeneratorS
 from operators.map_operator import MapOperator
 from utils.contracts import Schema, Operator, ArithmeticOperators, FieldAccessExpression, ArithmeticExpression, \
     ConstantExpression, FieldAssignmentExpression
-from utils.utils import random_list_element, random_int_between, shuffle_list
+from utils.utils import random_list_element, random_int_between, shuffle_list, random_field_name
 
 
 class MapOperatorReorderGeneratorStrategy(BaseGeneratorStrategy):
@@ -26,7 +26,7 @@ class MapOperatorReorderGeneratorStrategy(BaseGeneratorStrategy):
     def __initializeRandomlyOrderedMaps(self, schema: Schema):
         schemaCopy = deepcopy(schema)
         numFields = schemaCopy.get_numerical_fields()
-        _, firstFieldName = random_list_element(numFields)
+        firstFieldName = random_field_name(numFields)
         numFields.remove(firstFieldName)
         contValue1 = random_int_between(1, 10)
         _, arithOperation = random_list_element(list(ArithmeticOperators))
@@ -35,7 +35,7 @@ class MapOperatorReorderGeneratorStrategy(BaseGeneratorStrategy):
         firstMap = MapOperator(FieldAssignmentExpression(FieldAccessExpression(firstFieldName),
                                                          expression1), schema)
 
-        _, secondFieldName = random_list_element(numFields)
+        secondFieldName = random_field_name(numFields)
         contValue2 = random_int_between(1, 10)
         _, arithOperation = random_list_element(list(ArithmeticOperators))
         expression2 = ArithmeticExpression(FieldAccessExpression(secondFieldName),

@@ -4,6 +4,7 @@ from typing import List
 
 from generator_config.config import GeneratorConfig
 from operator_generator_strategies.base_generator_strategy import BaseGeneratorStrategy
+from operators.union_operator import UnionOperator
 from query_generator.query import Query
 from operator_generator_strategies.distinct_operator_strategies.distinct_sink_strategy import \
     DistinctSinkGeneratorStrategy
@@ -48,8 +49,10 @@ class QueryGenerator:
 
             # Add sink operator to the query
             outputSchema = new_query.output_schema()
+            unionOperator = UnionOperator(outputSchema, new_query, new_query)
+            unionedQuery = Query().add_operator(unionOperator)
             sinkOperator = DistinctSinkGeneratorStrategy().generate(outputSchema)
-            new_query.add_operator(sinkOperator)
-            self._queries.append(new_query)
+            unionedQuery.add_operator(sinkOperator)
+            self._queries.append(unionedQuery)
 
         return self._queries

@@ -5,7 +5,7 @@ from operator_generator_strategies.base_generator_strategy import BaseGeneratorS
 from operators.map_operator import MapOperator
 from utils.contracts import Schema, Operator, ArithmeticOperators, ArithmeticExpression, FieldAccessExpression, \
     FieldAssignmentExpression
-from utils.utils import random_list_element, shuffle_list
+from utils.utils import random_list_element, shuffle_list, random_field_name
 
 
 class MapExpressionReorderGeneratorStrategy(BaseGeneratorStrategy):
@@ -36,13 +36,20 @@ class MapExpressionReorderGeneratorStrategy(BaseGeneratorStrategy):
                                                          FieldAccessExpression(shuffledExpressionField[i]),
                                                          self._arithmeticOp)
 
-        mapOp = MapOperator(FieldAssignmentExpression(FieldAccessExpression(self._assignmentFieldName), initialExpression),
-                            self._schema)
+        mapOp = MapOperator(
+            FieldAssignmentExpression(FieldAccessExpression(self._assignmentFieldName), initialExpression),
+            self._schema)
         return [mapOp]
 
     def __initializeRandomlyOrderedMapExpression(self, schema: Schema):
         numFields = schema.get_numerical_fields()
-        _, self._assignmentFieldName = random_list_element(numFields)
+        self._assignmentFieldName = random_field_name(numFields)
         _, self._arithmeticOp = random_list_element([ArithmeticOperators.Add, ArithmeticOperators.Mul])
-        self._expressionFields = schema.int_fields
+
+        expressionFields: List[str] = []
+        for numField in numFields:
+            if not "NEW_" in numField:
+                expressionFields.append(numField)
+
+        self._expressionFields = expressionFields
         self._schema = schema

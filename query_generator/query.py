@@ -14,6 +14,9 @@ class Query:
     def generate_code(self) -> str:
         code = ""
         for idx, operator in enumerate(self._operators):
+            # if isinstance(operator, UnionOperator):
+            #     unionOperator = UnionOperator(operator)
+            #     codeunionOperator.generate_code()
             code += f"{operator.generate_code()}"
             if idx < len(self._operators) - 1:
                 code += "."

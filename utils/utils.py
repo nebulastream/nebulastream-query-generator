@@ -21,7 +21,7 @@ def random_field_name(elements: List[str], ignore_new: bool = True) -> str:
     :return: field name
     """
     idx, ele = random_list_element(elements)
-    if not ignore_new and "new" in ele:
+    if ignore_new and "NEW_" in ele:
         return random_field_name(elements)
     return ele
 

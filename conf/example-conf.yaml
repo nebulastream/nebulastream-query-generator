@@ -1,7 +1,7 @@
-no_queries: 1001
+no_queries: 10000
 generate_equivalent_queries: true
 equivalence_config:
-  no_of_equivalent_query_groups: 100
+  no_of_equivalent_query_groups: 1000
 source_list:
   - stream_name: 'example'
     int_fields: [ 'id', 'val', 'X', 'Y' ]
