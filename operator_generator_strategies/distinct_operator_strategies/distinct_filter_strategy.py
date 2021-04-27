@@ -4,7 +4,7 @@ from operator_generator_strategies.base_generator_strategy import BaseGeneratorS
 from operators.filter_operator import FilterOperator
 from utils.contracts import Schema, Operator, LogicalExpression, FieldAccessExpression, \
     ConstantExpression, LogicalOperators
-from utils.utils import random_list_element
+from utils.utils import random_list_element, random_int_between
 
 
 class DistinctFilterGeneratorStrategy(BaseGeneratorStrategy):
@@ -14,8 +14,9 @@ class DistinctFilterGeneratorStrategy(BaseGeneratorStrategy):
 
     def generate(self, schema: Schema) -> List[Operator]:
         _, field = random_list_element(schema.get_numerical_fields())
+        constant = random_int_between(1, 10000)
         _, operator = random_list_element(
             [LogicalOperators.lt, LogicalOperators.gt, LogicalOperators.lte, LogicalOperators.gte])
         filter_operator = FilterOperator(
-            LogicalExpression(FieldAccessExpression(field), ConstantExpression("10"), operator), schema)
+            LogicalExpression(FieldAccessExpression(field), ConstantExpression(constant), operator), schema)
         return [filter_operator]
