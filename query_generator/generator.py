@@ -31,6 +31,7 @@ class QueryGenerator:
 
         equivalentOperatorGenerators = self._equivalentOperatorGenerators
         distinctOperatorGenerators = self._distinctOperatorGenerators
+        downStreamOp
         while len(self._queries) < self._numberOfQueriesToGenerate:
             new_query = Query().add_operator(sourceOperator)
 

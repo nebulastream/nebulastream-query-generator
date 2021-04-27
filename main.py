@@ -47,50 +47,33 @@ def run(config_file):
                         timestamp_fields=sourceConf['timestamp_fields'], double_fields=sourceConf['double_fields'])
         possibleSources.append(source)
 
-    filter_expression_reorder_strategy = FilterExpressionReorderGeneratorStrategy()
-    filter_operator_reorder_strategy = FilterOperatorReorderGeneratorStrategy()
-    map_expression_reorder_strategy = MapExpressionReorderGeneratorStrategy()
-    map_operator_reorder_strategy = MapOperatorReorderGeneratorStrategy()
-    map_create_new_field_strategy = MapCreateNewFieldGeneratorStrategy()
-    map_substitute_map_expression_strategy = MapSubstituteMapExpressionGeneratorStrategy()
-    filter_substitute_map_expression_strategy = FilterSubstituteMapExpressionGeneratorStrategy()
-    filter_equivalent_filter_strategy = FilterEquivalentFilterGeneratorStrategy()
-
-    filter_generator = DistinctFilterGeneratorStrategy(max_number_of_predicates=2)
-    map_generator = DistinctMapGeneratorStrategy()
-    distinctOperatorGeneratorStrategies = [filter_generator, map_generator]
-    equivalentOperatorGeneratorStrategies = [
-        map_expression_reorder_strategy,
-        map_operator_reorder_strategy,
-        map_create_new_field_strategy, map_substitute_map_expression_strategy,
-        filter_substitute_map_expression_strategy,
-        filter_expression_reorder_strategy, filter_operator_reorder_strategy,
-        filter_equivalent_filter_strategy
-    ]
-
     generateEquivalentQueries = configuration['generate_equivalent_queries']
-
-    numberOfQueryGroups = 1
-    if generateEquivalentQueries:
-        numberOfQueryGroups = configuration['equivalence_config']['no_of_equivalent_query_groups']
+    numberOfQueries = configuration['no_queries']
+    percentageOfRandomQueries = configuration['percentage_of_random_queries']
+    # initially the number of random queries equal to number of queries
+    numberOfRandomQueries = (numberOfQueries * percentageOfRandomQueries) / 100
 
     queries: List[Query] = []
-    numberOfQueries = configuration['no_queries']
-    numberOfQueriesPerGroup = int(numberOfQueries / numberOfQueryGroups)
-    # Iterate over number of query groups
-    for i in range(numberOfQueryGroups):
+    if generateEquivalentQueries:
+        numberOfEquivalentQueries = numberOfQueries - numberOfRandomQueries
+        numberOfQueryGroups = configuration['equivalence_config']['no_of_equivalent_query_groups']
+        numberOfQueriesPerGroup = int(numberOfEquivalentQueries / numberOfQueryGroups)
+        # Iterate over number of query groups
+        for i in range(numberOfQueryGroups):
+            # NOTE: this won't work when we need a binary operator in the query
+            _, sourceToUse = random_list_element(possibleSources)
+            generatedQueries = getEquivalentQueries(numberOfQueriesPerGroup, sourceToUse)
+            queries.extend(generatedQueries)
+
+        # Populate remaining queries
+        numberOfQueriesPerGroup = numberOfEquivalentQueries - (numberOfQueriesPerGroup * numberOfQueryGroups)
         # NOTE: this won't work when we need a binary operator in the query
         _, sourceToUse = random_list_element(possibleSources)
-        generatedQueries = generateQueries(generateEquivalentQueries, numberOfQueriesPerGroup, sourceToUse,
-                                           equivalentOperatorGeneratorStrategies, distinctOperatorGeneratorStrategies)
+        generatedQueries = getEquivalentQueries(numberOfQueriesPerGroup, sourceToUse)
         queries.extend(generatedQueries)
 
-    # Populate remaining queries
-    numberOfQueriesPerGroup = numberOfQueries - (numberOfQueriesPerGroup * numberOfQueryGroups)
-    # NOTE: this won't work when we need a binary operator in the query
     _, sourceToUse = random_list_element(possibleSources)
-    generatedQueries = generateQueries(generateEquivalentQueries, numberOfQueriesPerGroup, sourceToUse,
-                                       equivalentOperatorGeneratorStrategies, distinctOperatorGeneratorStrategies)
+    generatedQueries = getRandomQueries(numberOfRandomQueries, sourceToUse)
     queries.extend(generatedQueries)
 
     # Write queries into file
@@ -100,16 +83,38 @@ def run(config_file):
             f.write("\n")
 
 
-def generateQueries(generateEquivalentQueries: bool, numberOfQueriesPerGroup: int, sourceToUse: Schema,
-                    equivalentOperatorGeneratorStrategies: List[BaseGeneratorStrategy],
-                    distinctOperatorGeneratorStrategies: List[BaseGeneratorStrategy]) -> List[Query]:
-    equivalentOperatorGenerators: List[BaseGeneratorStrategy] = []
-    if generateEquivalentQueries:
-        equivalentOperatorGenerators = random.sample(equivalentOperatorGeneratorStrategies, 4)
-        distinctOperatorGeneratorStrategies = []
+def getRandomQueries(numberOfQueries: int, sourceToUse: Schema) -> List[Query]:
+    filter_generator = DistinctFilterGeneratorStrategy(max_number_of_predicates=2)
+    map_generator = DistinctMapGeneratorStrategy()
+    distinctOperatorGeneratorStrategies = [filter_generator, map_generator]
+
+    return QueryGenerator(sourceToUse, numberOfQueries, [], distinctOperatorGeneratorStrategies).generate()
+
+
+def getEquivalentQueries(numberOfQueriesPerGroup: int, sourceToUse: Schema) -> List[Query]:
+    # Initialize instances of each generator strategy
+    filter_expression_reorder_strategy = FilterExpressionReorderGeneratorStrategy()
+    filter_operator_reorder_strategy = FilterOperatorReorderGeneratorStrategy()
+    map_expression_reorder_strategy = MapExpressionReorderGeneratorStrategy()
+    map_operator_reorder_strategy = MapOperatorReorderGeneratorStrategy()
+    map_create_new_field_strategy = MapCreateNewFieldGeneratorStrategy()
+    map_substitute_map_expression_strategy = MapSubstituteMapExpressionGeneratorStrategy()
+    filter_substitute_map_expression_strategy = FilterSubstituteMapExpressionGeneratorStrategy()
+    filter_equivalent_filter_strategy = FilterEquivalentFilterGeneratorStrategy()
+    equivalentOperatorGeneratorStrategies = [
+        map_expression_reorder_strategy,
+        map_operator_reorder_strategy,
+        map_create_new_field_strategy,
+        map_substitute_map_expression_strategy,
+        filter_substitute_map_expression_strategy,
+        filter_expression_reorder_strategy, filter_operator_reorder_strategy,
+        filter_equivalent_filter_strategy
+    ]
+
+    equivalentOperatorGenerators = random.sample(equivalentOperatorGeneratorStrategies, 4)
 
     return QueryGenerator(sourceToUse, numberOfQueriesPerGroup, equivalentOperatorGenerators,
-                          distinctOperatorGeneratorStrategies).generate()
+                          []).generate()
 
 
 if __name__ == '__main__':

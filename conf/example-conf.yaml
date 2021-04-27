@@ -1,7 +1,10 @@
 no_queries: 10000
 generate_equivalent_queries: true
+min_query_operators: 4
+max_query_operators: 4
+percentage_of_random_queries: 100
 equivalence_config:
-  no_of_equivalent_query_groups: 1000
+  no_of_equivalent_query_groups: 100
 source_list:
   - stream_name: 'example'
     int_fields: [ 'id', 'val', 'X', 'Y' ]
