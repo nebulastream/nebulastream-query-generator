@@ -15,6 +15,7 @@ class DistinctMapGeneratorStrategy(BaseGeneratorStrategy):
         _, operator = random_list_element(list(ArithmeticOperators))
         constant = random_int_between(0, 10000)
 
+        # Select one the two different map operator randomly
         if constant % 2 == 0:
             result_variable = f"{left_operand}_{operator}_{right_operand}"
             output_schema.int_fields.append(result_variable)
