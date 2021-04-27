@@ -1,15 +1,13 @@
-import random
-from copy import deepcopy
-from typing import List
-
-from generator_config.config import GeneratorConfig
 from operator_generator_strategies.base_generator_strategy import BaseGeneratorStrategy
+from operators.map_operator import MapOperator
 from operators.union_operator import UnionOperator
 from query_generator.query import Query
 from operator_generator_strategies.distinct_operator_strategies.distinct_sink_strategy import \
     DistinctSinkGeneratorStrategy
-from operator_generator_strategies.distinct_operator_strategies.distinct_source_strategy import SourceOperator, \
+from operator_generator_strategies.distinct_operator_strategies.distinct_source_strategy import \
     DistinctSourceGeneratorStrategy
+from operator_generator_strategies.distinct_operator_strategies.distinct_map_strategy import \
+    DistinctMapGeneratorStrategy
 from utils.contracts import Schema
 from utils.utils import *
 
@@ -31,7 +29,9 @@ class QueryGenerator:
 
         equivalentOperatorGenerators = self._equivalentOperatorGenerators
         distinctOperatorGenerators = self._distinctOperatorGenerators
-        downStreamOp
+
+        downStreamOperator: MapOperator = DistinctMapGeneratorStrategy().generate(sourceOperator.output_schema)[0]
+        print(downStreamOperator.generate_code())
         while len(self._queries) < self._numberOfQueriesToGenerate:
             new_query = Query().add_operator(sourceOperator)
 
@@ -52,7 +52,8 @@ class QueryGenerator:
             outputSchema = new_query.output_schema()
             unionOperator = UnionOperator(outputSchema, new_query, new_query)
             unionedQuery = Query().add_operator(unionOperator)
-            sinkOperator = DistinctSinkGeneratorStrategy().generate(outputSchema)
+            unionedQuery.add_operator(downStreamOperator)
+            sinkOperator = DistinctSinkGeneratorStrategy().generate(unionedQuery.output_schema())
             unionedQuery.add_operator(sinkOperator)
             self._queries.append(unionedQuery)
 

@@ -14,13 +14,10 @@ class Query:
     def generate_code(self) -> str:
         code = ""
         for idx, operator in enumerate(self._operators):
-            # if isinstance(operator, UnionOperator):
-            #     unionOperator = UnionOperator(operator)
-            #     codeunionOperator.generate_code()
             code += f"{operator.generate_code()}"
             if idx < len(self._operators) - 1:
                 code += "."
         return code
 
     def output_schema(self) -> Schema:
-        return self._operators[-1].get_output_schema()
+        return self._operators[0].get_output_schema()
