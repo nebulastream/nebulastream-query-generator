@@ -1,22 +1,18 @@
 from typing import List
 
+from utils.utils import shuffle_list
 from operator_generator_strategies.base_generator_strategy import BaseGeneratorStrategy
-from operators.filter_operator import FilterOperator
-from utils.contracts import Schema, Operator, LogicalExpression, FieldAccessExpression, \
-    ConstantExpression, LogicalOperators
-from utils.utils import random_list_element, random_int_between
+from operators.union_operator import UnionOperator
+from query_generator.query import Query
+from utils.contracts import Operator
 
 
-class DistinctFilterGeneratorStrategy(BaseGeneratorStrategy):
-    def __init__(self, max_number_of_predicates: int = 1):
+class DistinctUnionGeneratorStrategy(BaseGeneratorStrategy):
+    def __init__(self):
         super().__init__()
-        self._max_number_of_predicates = max_number_of_predicates
 
-    def generate(self, schema: Schema) -> List[Operator]:
-        _, field = random_list_element(schema.get_numerical_fields())
-        constant = random_int_between(1, 10000)
-        _, operator = random_list_element(
-            [LogicalOperators.lt, LogicalOperators.gt, LogicalOperators.lte, LogicalOperators.gte])
-        filter_operator = FilterOperator(
-            LogicalExpression(FieldAccessExpression(field), ConstantExpression(constant), operator), schema)
-        return [filter_operator]
+    def generate(self, subQueries: List[Query]) -> List[Operator]:
+        shuffledSubQueries = shuffle_list(subQueries)
+        schema = shuffledSubQueries[0].output_schema()
+        union = UnionOperator(schema=schema, leftSubQuery=shuffledSubQueries[0], rightSubQuery=shuffledSubQueries[1])
+        return [union]
