@@ -1,4 +1,5 @@
 import random
+import string
 from typing import List, Any
 
 
@@ -24,6 +25,14 @@ def random_field_name(elements: List[str], ignore_new: bool = True) -> str:
     if ignore_new and "NEW_" in ele:
         return random_field_name(elements)
     return ele
+
+
+def random_name() -> str:
+    """
+    Generate a random field name with 5 characters
+    :return: random name
+    """
+    return ''.join(random.choices(string.ascii_lowercase, k=5))
 
 
 def shuffle_list(elements: List[Any]) -> List[Any]:

@@ -8,7 +8,7 @@ class ArithmeticOperators(enum.Enum):
     Add = "+"
     Mul = "*"
     Sub = "-"
-    Div = "/"
+    # Div = "/"
 
 
 class LogicalOperators(enum.Enum):
@@ -20,6 +20,25 @@ class LogicalOperators(enum.Enum):
     nt = "!"
     # And = "&&"
     # Or = "||"
+
+
+class Aggregations(enum.Enum):
+    sum = "Sum"
+    avg = "Avg"
+    min = "Min"
+    max = "Max"
+    count = "Count"
+    median = "Median"
+
+
+class WindowKey(enum.Enum):
+    keyed = "keyed"
+    nonKeyed = "non-keyed"
+
+
+class WindowType(enum.Enum):
+    tumbling = "Tumbling"
+    sliding = "Sliding"
 
 
 @dataclass
@@ -108,4 +127,3 @@ class Operator(ABC):
         :return: Query API representation of logic
         """
         pass
-

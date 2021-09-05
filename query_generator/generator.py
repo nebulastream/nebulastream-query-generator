@@ -22,7 +22,7 @@ class QueryGenerator:
         self._distinctOperatorGenerators: List[BaseGeneratorStrategy] = distinctOperatorGenerators
         self._queries: List[Query] = []
 
-    def generate(self) -> List[Query]:
+    def generate(self, binary: bool=True) -> List[Query]:
         # self.__inject_source_operators()
         sourceGenerator = DistinctSourceGeneratorStrategy()
         sourceOperator = sourceGenerator.generate(self._schema)
@@ -33,28 +33,33 @@ class QueryGenerator:
         downStreamOperator: MapOperator = DistinctMapGeneratorStrategy().generate(sourceOperator.output_schema)[0]
         print(downStreamOperator.generate_code())
         while len(self._queries) < self._numberOfQueriesToGenerate:
-            new_query = Query().add_operator(sourceOperator)
+            newQuery = Query().add_operator(sourceOperator)
 
             # Generate equivalent operators
             for generatorRule in equivalentOperatorGenerators:
-                operators = generatorRule.generate(new_query.output_schema())
+                operators = generatorRule.generate(newQuery.output_schema())
                 for operator in operators:
-                    new_query.add_operator(operator)
+                    newQuery.add_operator(operator)
 
             # Generate random operators
             shuffle_list(distinctOperatorGenerators)
             for generatorRule in distinctOperatorGenerators:
-                operators = generatorRule.generate(new_query.output_schema())
+                operators = generatorRule.generate(newQuery.output_schema())
                 for operator in operators:
-                    new_query.add_operator(operator)
+                    newQuery.add_operator(operator)
 
             # Add sink operator to the query
-            outputSchema = new_query.output_schema()
-            unionOperator = UnionOperator(outputSchema, new_query, new_query)
-            unionedQuery = Query().add_operator(unionOperator)
-            unionedQuery.add_operator(downStreamOperator)
-            sinkOperator = DistinctSinkGeneratorStrategy().generate(unionedQuery.output_schema())
-            unionedQuery.add_operator(sinkOperator)
-            self._queries.append(unionedQuery)
+            outputSchema = newQuery.output_schema()
+            if binary:
+                unionOperator = UnionOperator(outputSchema, newQuery, newQuery)
+                unionedQuery = Query().add_operator(unionOperator)
+                unionedQuery.add_operator(downStreamOperator)
+                sinkOperator = DistinctSinkGeneratorStrategy().generate(unionedQuery.output_schema())
+                unionedQuery.add_operator(sinkOperator)
+                self._queries.append(unionedQuery)
+            else:
+                sinkOperator = DistinctSinkGeneratorStrategy().generate(outputSchema)
+                newQuery.add_operator(sinkOperator)
+                self._queries.append(newQuery)
 
         return self._queries

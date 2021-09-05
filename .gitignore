@@ -261,4 +261,4 @@ Thumbs.db #thumbnail cache on Windows
 pyvenv.cfg
 .venv
 pip-selfcheck.json
-generated_queries.txt
+../nes/benchmark/src/Micro-Benchmarks/Query-Merger/QueryLoad/generated_queries.txt
