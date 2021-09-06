@@ -41,6 +41,11 @@ class WindowType(enum.Enum):
     sliding = "Sliding"
 
 
+class TimeUnit(enum.Enum):
+    seconds = "Seconds"
+    minutes = "Minutes"
+
+
 @dataclass
 class Schema:
     name: str
@@ -51,6 +56,9 @@ class Schema:
 
     def get_numerical_fields(self) -> List[str]:
         return self.int_fields + self.double_fields
+
+    def get_timestamp_fields(self) -> List[str]:
+        return self.timestamp_fields
 
 
 class Expression(ABC):
