@@ -12,6 +12,14 @@ from utils.utils import *
 
 class AggregationEquivalentAggregationGeneratorStrategy(BaseGeneratorStrategy):
 
+    def __init__(self):
+        self._equivalentFilterOperators = None
+        self._field = None
+        self._windowKey = None
+        self._aggregationOperation = None
+        self._intervalInMin = None
+        self._timestampField = None
+
     def generate(self, schema: Schema) -> AggregationOperator:
         """
         Queries with similar Window Aggregation Operators:
@@ -40,7 +48,9 @@ class AggregationEquivalentAggregationGeneratorStrategy(BaseGeneratorStrategy):
         if bool(random.getrandbits(1)):
             windowKey = random_field_name(schema.get_numerical_fields())
 
-        window = WindowOperator(windowType=windowType, windowKey=windowKey, Schema=self._schema)
+        schema = Schema(name=schema.name, int_fields=[windowKey], double_fields=[], string_fields=[],
+                        timestamp_fields=[self._timestampField])
+        window = WindowOperator(windowType=windowType, windowKey=windowKey, schema=schema)
 
         aggregation = ""
         if self._aggregationOperation == Aggregations.count:

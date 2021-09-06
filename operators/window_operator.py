@@ -6,7 +6,6 @@ class WindowOperator(Operator):
         super().__init__(schema)
         self._windowType = windowType
         self._windowKey = windowKey
-        self._schema = schema
 
     def generate_code(self) -> str:
         code = f"window({self._windowType})"

@@ -23,8 +23,11 @@ class DistinctWindowGeneratorStrategy(BaseGeneratorStrategy):
         else:
             windowType = f"{windowType}::of(EventTime(Attribute({timestampField})), {timeUnit}({windowLength}))"
 
-        windowKey = random_field_name(schema.get_numerical_fields())
-        schema = Schema(name=schema.name, int_fields=[], double_fields=[], string_fields=[],
+        windowKey = ""
+        if bool(random.getrandbits(1)):
+            windowKey = random_field_name(schema.get_numerical_fields())
+
+        schema = Schema(name=schema.name, int_fields=[windowKey], double_fields=[], string_fields=[],
                         timestamp_fields=[timestampField])
-        window = WindowOperator(windowType=windowType, windowKey=windowKey, Schema=schema)
+        window = WindowOperator(windowType=windowType, windowKey=windowKey, schema=schema)
         return [window]
