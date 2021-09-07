@@ -37,7 +37,7 @@ class ProjectEquivalentProjectGeneratorStrategy(BaseGeneratorStrategy):
                             string_fields=schema.string_fields,
                             timestamp_fields=schema.timestamp_fields)
 
-        project = ProjectOperator(fieldsToProject=fields, newFieldNames=newFiledNames, Schema=schema)
+        project = ProjectOperator(fieldsToProject=fields, newFieldNames=newFiledNames, schema=schema)
         return [project]
 
     def __initializeFieldsToProject(self, schema: Schema):

@@ -30,8 +30,6 @@ class QueryGenerator:
         equivalentOperatorGenerators = self._equivalentOperatorGenerators
         distinctOperatorGenerators = self._distinctOperatorGenerators
 
-        downStreamOperator: MapOperator = DistinctMapGeneratorStrategy().generate(sourceOperator.output_schema)[0]
-        print(downStreamOperator.generate_code())
         while len(self._queries) < self._numberOfQueriesToGenerate:
             newQuery = Query().add_operator(sourceOperator)
 

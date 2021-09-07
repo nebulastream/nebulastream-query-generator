@@ -4,8 +4,6 @@ from typing import List
 import click
 import yaml
 
-from generator_config.config import GeneratorConfig
-from operator_generator_strategies.base_generator_strategy import BaseGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.filter_equivalent_filter_strategy import \
     FilterEquivalentFilterGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.filter_substitute_map_expression_startegy import \
@@ -14,15 +12,6 @@ from operator_generator_strategies.equivalent_operator_strategies.map_create_new
     MapCreateNewFieldGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.map_substitute_map_expression_strategy import \
     MapSubstituteMapExpressionGeneratorStrategy
-from query_generator.query import Query
-from utils.contracts import Schema
-from operator_generator_strategies.distinct_operator_strategies.distinct_filter_strategy import \
-    DistinctFilterGeneratorStrategy
-from query_generator.generator import QueryGenerator
-from operator_generator_strategies.distinct_operator_strategies.distinct_map_strategy import \
-    DistinctMapGeneratorStrategy
-from operator_generator_strategies.distinct_operator_strategies.distinct_projection_strategy import \
-    DistinctProjectionGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.filter_expression_reorder_strategy import \
     FilterExpressionReorderGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.filter_operator_reorder_strategy import \
@@ -33,6 +22,22 @@ from operator_generator_strategies.equivalent_operator_strategies.map_operator_r
     MapOperatorReorderGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.project_equivalent_strategy import \
     ProjectEquivalentProjectGeneratorStrategy
+from query_generator.query import Query
+from utils.contracts import Schema
+from operator_generator_strategies.distinct_operator_strategies.distinct_filter_strategy import \
+    DistinctFilterGeneratorStrategy
+from query_generator.generator import QueryGenerator
+from operator_generator_strategies.distinct_operator_strategies.distinct_map_strategy import \
+    DistinctMapGeneratorStrategy
+from operator_generator_strategies.distinct_operator_strategies.distinct_projection_strategy import \
+    DistinctProjectionGeneratorStrategy
+from operator_generator_strategies.distinct_operator_strategies.distinct_aggregation_strategy import \
+    DistinctAggregationGeneratorStrategy
+from operator_generator_strategies.distinct_operator_strategies.distinct_union_strategy import \
+    DistinctUnionGeneratorStrategy
+from operator_generator_strategies.distinct_operator_strategies.distinct_join_strategy import \
+    DistinctJoinGeneratorStrategy
+
 from utils.utils import random_list_element
 
 
@@ -99,7 +104,11 @@ def getRandomQueries(numberOfQueries: int, binaryOperator: bool, sourceToUse: Sc
     filter_generator = DistinctFilterGeneratorStrategy(max_number_of_predicates=2)
     map_generator = DistinctMapGeneratorStrategy()
     project_generator = DistinctProjectionGeneratorStrategy()
-    distinctOperatorGeneratorStrategies = [filter_generator, map_generator, project_generator]
+    union_generator = DistinctUnionGeneratorStrategy()
+    join_generator = DistinctJoinGeneratorStrategy()
+    aggregation_generator = DistinctAggregationGeneratorStrategy()
+
+    distinctOperatorGeneratorStrategies = [filter_generator, map_generator, project_generator, aggregation_generator]
 
     return QueryGenerator(sourceToUse, numberOfQueries, [], distinctOperatorGeneratorStrategies).generate(
         binaryOperator)

@@ -15,4 +15,10 @@ class DistinctUnionGeneratorStrategy(BaseGeneratorStrategy):
         shuffledSubQueries = shuffle_list(subQueries)
         schema = shuffledSubQueries[0].output_schema()
         union = UnionOperator(schema=schema, leftSubQuery=shuffledSubQueries[0], rightSubQuery=shuffledSubQueries[1])
+        if len(subQueries) > 2:
+            for i in range(2, len(subQueries)):
+                subQuery = Query().add_operator(union)
+                union = UnionOperator(schema=subQuery.output_schema(), leftSubQuery=subQuery,
+                                      rightSubQuery=shuffledSubQueries[i])
+
         return [union]

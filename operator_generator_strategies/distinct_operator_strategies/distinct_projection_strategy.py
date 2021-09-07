@@ -1,5 +1,5 @@
 from typing import List
-from random import random
+import random
 
 from operator_generator_strategies.base_generator_strategy import BaseGeneratorStrategy
 from operators.project_operator import ProjectOperator
@@ -13,7 +13,7 @@ class DistinctProjectionGeneratorStrategy(BaseGeneratorStrategy):
         self._max_number_of_predicates = max_number_of_predicates
 
     def generate(self, schema: Schema) -> List[Operator]:
-        noOfFieldsToProject = random_int_between(2, len(schema.get_numerical_fields()))
+        noOfFieldsToProject = random_int_between(1, len(schema.get_numerical_fields()))
         fields = random.sample(schema.get_numerical_fields(), noOfFieldsToProject)
         newFiledNames = []
 
@@ -29,5 +29,5 @@ class DistinctProjectionGeneratorStrategy(BaseGeneratorStrategy):
                             string_fields=schema.string_fields,
                             timestamp_fields=schema.timestamp_fields)
 
-        project = ProjectOperator(fieldsToProject=fields, newFieldNames=newFiledNames, Schema=schema)
+        project = ProjectOperator(fieldsToProject=fields, newFieldNames=newFiledNames, schema=schema)
         return [project]

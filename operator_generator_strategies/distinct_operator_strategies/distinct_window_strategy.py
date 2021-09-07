@@ -1,5 +1,5 @@
 from typing import List
-from random import random
+import random
 
 from operator_generator_strategies.base_generator_strategy import BaseGeneratorStrategy
 from operators.window_operator import WindowOperator
@@ -19,15 +19,15 @@ class DistinctWindowGeneratorStrategy(BaseGeneratorStrategy):
         windowLength = random_int_between(1, 100)
         if windowType == WindowType.sliding:
             windowSlide = random_int_between(1, 100)
-            windowType = f"{windowType}::of(EventTime(Attribute({timestampField})), {timeUnit}({windowLength}), {timeUnit}({windowSlide}))"
+            windowType = f"{windowType.value}::of(EventTime(Attribute(\"{timestampField}\")), {timeUnit.value}({windowLength}), {timeUnit.value}({windowSlide}))"
         else:
-            windowType = f"{windowType}::of(EventTime(Attribute({timestampField})), {timeUnit}({windowLength}))"
+            windowType = f"{windowType.value}::of(EventTime(Attribute(\"{timestampField}\")), {timeUnit.value}({windowLength}))"
 
         windowKey = ""
         if bool(random.getrandbits(1)):
             windowKey = random_field_name(schema.get_numerical_fields())
 
         schema = Schema(name=schema.name, int_fields=[windowKey], double_fields=[], string_fields=[],
-                        timestamp_fields=[timestampField])
+                        timestamp_fields=[])
         window = WindowOperator(windowType=windowType, windowKey=windowKey, schema=schema)
         return [window]

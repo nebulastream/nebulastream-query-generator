@@ -12,5 +12,5 @@ class AggregationOperator(Operator):
     def generate_code(self) -> str:
         code = f"{self._window.generate_code()}.apply({self._aggregation}"
         if self._alias:
-            code = f"{code}.as({self._alias}"
+            code = f"{code}->as(Attribute(\"{self._alias}\"))"
         return f"{code})"

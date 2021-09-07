@@ -1,15 +1,13 @@
-from random import random
+import random
 from typing import List
 
-import operator_generator_strategies.distinct_operator_strategies.distinct_aggregation_strategy
 from operator_generator_strategies.distinct_operator_strategies.distinct_window_strategy import \
     DistinctWindowGeneratorStrategy
 from utils.contracts import Aggregations
 from operator_generator_strategies.base_generator_strategy import BaseGeneratorStrategy
 from operators.aggregation_operator import AggregationOperator
-from utils.contracts import Schema, Operator, LogicalExpression, FieldAccessExpression, \
-    ConstantExpression, LogicalOperators
-from utils.utils import random_list_element, random_int_between, random_name
+from utils.contracts import Schema, Operator
+from utils.utils import random_list_element, random_name
 
 
 class DistinctAggregationGeneratorStrategy(BaseGeneratorStrategy):
@@ -24,9 +22,9 @@ class DistinctAggregationGeneratorStrategy(BaseGeneratorStrategy):
 
         aggregation = ""
         if aggregationOperation == Aggregations.count:
-            aggregation = f"{aggregationOperation}()"
+            aggregation = f"{aggregationOperation.value}()"
         else:
-            aggregation = f"{aggregationOperation}(Attribute({field}))"
+            aggregation = f"{aggregationOperation.value}(Attribute(\"{field}\"))"
 
         outputField = field
         alias = ""

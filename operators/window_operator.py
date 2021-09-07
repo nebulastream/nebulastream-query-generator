@@ -10,5 +10,5 @@ class WindowOperator(Operator):
     def generate_code(self) -> str:
         code = f"window({self._windowType})"
         if self._windowKey:
-            code = f"{code}.byKey({self._windowKey})"
+            code = f"{code}.byKey(Attribute(\"{self._windowKey}\"))"
         return code

@@ -37,8 +37,8 @@ class WindowKey(enum.Enum):
 
 
 class WindowType(enum.Enum):
-    tumbling = "Tumbling"
-    sliding = "Sliding"
+    tumbling = "TumblingWindow"
+    sliding = "SlidingWindow"
 
 
 class TimeUnit(enum.Enum):
