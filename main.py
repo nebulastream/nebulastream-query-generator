@@ -22,6 +22,8 @@ from operator_generator_strategies.equivalent_operator_strategies.map_operator_r
     MapOperatorReorderGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.project_equivalent_strategy import \
     ProjectEquivalentProjectGeneratorStrategy
+from operator_generator_strategies.equivalent_operator_strategies.aggregation_equivalent_aggregation_strategy import \
+    AggregationEquivalentAggregationGeneratorStrategy
 from query_generator.query import Query
 from utils.contracts import Schema
 from operator_generator_strategies.distinct_operator_strategies.distinct_filter_strategy import \
@@ -53,7 +55,8 @@ def run(config_file):
     for sourceConf in configuration['source_list']:
         source = Schema(name=sourceConf['stream_name'], int_fields=sourceConf['int_fields'],
                         string_fields=sourceConf['string_fields'],
-                        timestamp_fields=sourceConf['timestamp_fields'], double_fields=sourceConf['double_fields'])
+                        timestamp_fields=sourceConf['timestamp_fields'], double_fields=sourceConf['double_fields'],
+                        fieldNameMapping={})
         possibleSources.append(source)
 
     generateEquivalentQueries = configuration['generate_equivalent_queries']
@@ -130,6 +133,8 @@ def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: 
     filter_substitute_map_expression_strategy = FilterSubstituteMapExpressionGeneratorStrategy()
     filter_equivalent_filter_strategy = FilterEquivalentFilterGeneratorStrategy()
     project_equivalent_project_strategy = ProjectEquivalentProjectGeneratorStrategy()
+    aggregate_equivalent_aggregate_strategy = AggregationEquivalentAggregationGeneratorStrategy()
+
     equivalentOperatorGeneratorStrategies = [
         map_expression_reorder_strategy,
         map_operator_reorder_strategy,
@@ -137,17 +142,21 @@ def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: 
         map_substitute_map_expression_strategy,
         filter_substitute_map_expression_strategy,
         filter_expression_reorder_strategy, filter_operator_reorder_strategy,
-        filter_equivalent_filter_strategy
+        filter_equivalent_filter_strategy,
+        project_equivalent_project_strategy
     ]
 
-    filter_generator = DistinctFilterGeneratorStrategy(max_number_of_predicates=2)
-    map_generator = DistinctMapGeneratorStrategy()
-    distinctOperatorGeneratorStrategies = [filter_generator, map_generator, map_generator, filter_generator,
-                                           map_generator, filter_generator, map_generator, filter_generator]
+    filterGenerator = DistinctFilterGeneratorStrategy(max_number_of_predicates=2)
+    mapGenerator = DistinctMapGeneratorStrategy()
+    aggregateGenerator = DistinctAggregationGeneratorStrategy()
+    projectGenerator = DistinctProjectionGeneratorStrategy()
+    distinctOperatorGeneratorStrategies = [filterGenerator, mapGenerator, aggregateGenerator, projectGenerator,
+                                           mapGenerator, filterGenerator, mapGenerator, filterGenerator]
 
     distinctOperators = 8 - int((8 * percentageOfEquivalence) / 100)
     distinctOperatorGenerators = random.sample(distinctOperatorGeneratorStrategies, distinctOperators)
     equivalentOperatorGenerators = random.sample(equivalentOperatorGeneratorStrategies, 8 - distinctOperators)
+    equivalentOperatorGenerators.append(aggregate_equivalent_aggregate_strategy)
 
     return QueryGenerator(sourceToUse, numberOfQueriesPerGroup, equivalentOperatorGenerators,
                           distinctOperatorGenerators).generate(binaryOperator)

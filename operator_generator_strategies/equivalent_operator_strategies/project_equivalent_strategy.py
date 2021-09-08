@@ -29,18 +29,28 @@ class ProjectEquivalentProjectGeneratorStrategy(BaseGeneratorStrategy):
             for i in range(len(fields)):
                 newFiledNames.append(random_name())
 
+            fieldMap = dict()
+            for i in range(len(newFiledNames)):
+                fieldMap[newFiledNames[i]] = fields[i]
             schema = Schema(name=schema.name, int_fields=newFiledNames, double_fields=schema.double_fields,
                             string_fields=schema.string_fields,
-                            timestamp_fields=schema.timestamp_fields)
+                            timestamp_fields=schema.timestamp_fields, fieldNameMapping=fieldMap)
         else:
+            fieldMap = dict()
+            for i in range(len(fields)):
+                fieldMap[fields[i]] = fields[i]
             schema = Schema(name=schema.name, int_fields=fields, double_fields=schema.double_fields,
                             string_fields=schema.string_fields,
-                            timestamp_fields=schema.timestamp_fields)
+                            timestamp_fields=schema.timestamp_fields, fieldNameMapping=fieldMap)
 
         project = ProjectOperator(fieldsToProject=fields, newFieldNames=newFiledNames, schema=schema)
         return [project]
 
     def __initializeFieldsToProject(self, schema: Schema):
         schemaCopy = deepcopy(schema)
-        noOfFieldsToProject = random_int_between(2, len(schemaCopy.get_numerical_fields()))
-        self._fieldsToProject = random.sample(schemaCopy.get_numerical_fields(), noOfFieldsToProject)
+        numericalFields = schemaCopy.get_numerical_fields()
+        noOfFieldsToProject = random_int_between(2, len(numericalFields))
+        fieldsToProject = []
+        for i in range(noOfFieldsToProject):
+            fieldsToProject.append(numericalFields[i])
+        self._fieldsToProject = fieldsToProject

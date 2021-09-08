@@ -1,7 +1,7 @@
 import enum
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List
 
 
 class ArithmeticOperators(enum.Enum):
@@ -53,12 +53,19 @@ class Schema:
     double_fields: List[str]
     string_fields: List[str]
     timestamp_fields: List[str]
+    fieldNameMapping: dict()
 
     def get_numerical_fields(self) -> List[str]:
         return self.int_fields + self.double_fields
 
     def get_timestamp_fields(self) -> List[str]:
         return self.timestamp_fields
+
+    def get_field_name_mapping(self):
+        return self.fieldNameMapping
+
+    def set_field_name_mapping(self, fieldNameMapping: dict):
+        self.fieldNameMapping = fieldNameMapping
 
 
 class Expression(ABC):

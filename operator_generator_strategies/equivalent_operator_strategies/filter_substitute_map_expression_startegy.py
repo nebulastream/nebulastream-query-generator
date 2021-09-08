@@ -18,10 +18,14 @@ class FilterSubstituteMapExpressionGeneratorStrategy(BaseGeneratorStrategy):
     def generate(self, schema: Schema) -> List[Operator]:
         """
         This method is responsible for generating two map operators for simulating complex arithmetic expressions
-        Example:  map(y = 30).map(x = y* z) vs map(y = 30).map(x= 30*z)
+        Example:  map(y = 30).filter(x > 30) vs map(y = 30).filter(x > y)
         :param schema: schema to be used for generating the operators
         :return: the list of operators
         """
+        if len(schema.get_numerical_fields()) == 1:
+            print("Skipping FilterSubstituteMapExpressionGeneratorStrategy as only 1 field is present in the schema")
+            return []
+
         if not self._substitutedFilterOperators:
             self.__initializeFiltersWithSubstitutedMapExpression(schema)
         _, followUpMap = random_list_element(self._substitutedFilterOperators)

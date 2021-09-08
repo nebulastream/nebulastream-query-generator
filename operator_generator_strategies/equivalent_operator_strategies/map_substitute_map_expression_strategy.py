@@ -21,6 +21,11 @@ class MapSubstituteMapExpressionGeneratorStrategy(BaseGeneratorStrategy):
         :param schema:
         :return:
         """
+
+        if len(schema.get_numerical_fields()) == 1:
+            print("Skipping MapSubstituteMapExpressionGeneratorStrategy as only 1 field is present in the schema")
+            return []
+
         if not self._substitutedMapOperators:
             self.__initializeMapsWithComplexArithmeticExpressions(schema)
         _, followUpMap = random_list_element(self._substitutedMapOperators)
