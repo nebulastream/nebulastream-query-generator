@@ -82,12 +82,14 @@ def run(config_file):
         # Populate remaining queries
         remainingQueries = numberOfEquivalentQueries - (
                 numberOfQueriesPerGroup * numberOfGroupsPerSource * len(possibleSources))
-        # NOTE: this won't work when we need a binary operator in the query
-        for i in range(int(remainingQueries / numberOfQueriesPerGroup)):
-            _, sourceToUse = random_list_element(possibleSources)
-            generatedQueries = getEquivalentQueries(numberOfQueriesPerGroup, percentageOfEquivalence,
-                                                    binaryOperator, sourceToUse)
-            queries.extend(generatedQueries)
+
+        if remainingQueries > 0:
+            # NOTE: this won't work when we need a binary operator in the query
+            for i in range(int(remainingQueries / numberOfQueriesPerGroup)):
+                _, sourceToUse = random_list_element(possibleSources)
+                generatedQueries = getEquivalentQueries(numberOfQueriesPerGroup, percentageOfEquivalence,
+                                                        binaryOperator, sourceToUse)
+                queries.extend(generatedQueries)
 
     _, sourceToUse = random_list_element(possibleSources)
     generatedQueries = getRandomQueries(numberOfRandomQueries, binaryOperator, sourceToUse)
@@ -108,6 +110,7 @@ def getRandomQueries(numberOfQueries: int, binaryOperator: bool, sourceToUse: Sc
     join_generator = DistinctJoinGeneratorStrategy()
     aggregation_generator = DistinctAggregationGeneratorStrategy()
 
+    # 5 source Map Filter Sink
     distinctOperatorGeneratorStrategies = [filter_generator, map_generator, project_generator, aggregation_generator]
 
     return QueryGenerator(sourceToUse, numberOfQueries, [], distinctOperatorGeneratorStrategies).generate(
@@ -134,8 +137,7 @@ def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: 
         map_substitute_map_expression_strategy,
         filter_substitute_map_expression_strategy,
         filter_expression_reorder_strategy, filter_operator_reorder_strategy,
-        filter_equivalent_filter_strategy,
-        project_equivalent_project_strategy
+        filter_equivalent_filter_strategy
     ]
 
     filter_generator = DistinctFilterGeneratorStrategy(max_number_of_predicates=2)

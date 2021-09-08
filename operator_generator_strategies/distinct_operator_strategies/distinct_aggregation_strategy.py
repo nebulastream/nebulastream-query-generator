@@ -15,24 +15,23 @@ class DistinctAggregationGeneratorStrategy(BaseGeneratorStrategy):
         super().__init__()
 
     def generate(self, schema: Schema) -> List[Operator]:
+
+        window = DistinctWindowGeneratorStrategy().generate(schema)[0]
+
         fields = schema.get_numerical_fields()
+        if window._windowKey:
+            fields.remove(window._windowKey)
         _, field = random_list_element(fields)
         _, aggregationOperation = random_list_element(
-            [Aggregations.avg, Aggregations.min, Aggregations.max, Aggregations.sum, Aggregations.count])
-
-        aggregation = ""
-        if aggregationOperation == Aggregations.count:
-            aggregation = f"{aggregationOperation.value}()"
-        else:
-            aggregation = f"{aggregationOperation.value}(Attribute(\"{field}\"))"
+            [Aggregations.avg, Aggregations.min, Aggregations.max, Aggregations.sum])
 
         outputField = field
         alias = ""
+        aggregation = f"{aggregationOperation.value}(Attribute(\"{field}\"))"
         if bool(random.getrandbits(1)):
             alias = random_name()
             outputField = alias
 
-        window = DistinctWindowGeneratorStrategy().generate(schema)[0]
         schema = Schema(name=schema.name, int_fields=[outputField], double_fields=[], string_fields=[],
                         timestamp_fields=window.get_output_schema().timestamp_fields)
         aggregationOperator = AggregationOperator(aggregation=aggregation, alias=alias, window=window, schema=schema)

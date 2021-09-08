@@ -13,8 +13,11 @@ class DistinctProjectionGeneratorStrategy(BaseGeneratorStrategy):
         self._max_number_of_predicates = max_number_of_predicates
 
     def generate(self, schema: Schema) -> List[Operator]:
-        noOfFieldsToProject = random_int_between(1, len(schema.get_numerical_fields()))
-        fields = random.sample(schema.get_numerical_fields(), noOfFieldsToProject)
+        numericalFields = schema.get_numerical_fields()
+        noOfFieldsToProject = 1
+        if len(numericalFields) > 1:
+            noOfFieldsToProject = random_int_between(2, len(numericalFields))
+        fields = random.sample(numericalFields, noOfFieldsToProject)
         newFiledNames = []
 
         if bool(random.getrandbits(1)):
