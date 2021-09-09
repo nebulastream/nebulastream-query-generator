@@ -17,7 +17,9 @@ class DistinctProjectionGeneratorStrategy(BaseGeneratorStrategy):
         noOfFieldsToProject = 1
         if len(numericalFields) > 1:
             noOfFieldsToProject = random_int_between(2, len(numericalFields))
-        fields = random.sample(numericalFields, noOfFieldsToProject)
+        fields = []
+        for i in range(noOfFieldsToProject):
+            fields.append(numericalFields[i])
         newFiledNames = []
 
         if bool(random.getrandbits(1)):

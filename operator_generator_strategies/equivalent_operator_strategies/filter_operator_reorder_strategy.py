@@ -44,3 +44,9 @@ class FilterOperatorReorderGeneratorStrategy(BaseGeneratorStrategy):
         filter2 = FilterOperator(expression2, schema)
 
         self._filterOperators = [filter1, filter2]
+
+
+    def validation(self, schema: Schema) -> bool:
+        if self._assignmentFieldName not in schema.get_numerical_fields():
+            return False
+        return True

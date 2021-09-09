@@ -47,3 +47,8 @@ class FilterExpressionReorderGeneratorStrategy(BaseGeneratorStrategy):
         filter2 = FilterOperator(expression2, schema)
 
         self._equivalentFilters = [filter1, filter2]
+
+    def validation(self, schema: Schema) -> bool:
+        if self._assignmentFieldName not in schema.get_numerical_fields():
+            return False
+        return True

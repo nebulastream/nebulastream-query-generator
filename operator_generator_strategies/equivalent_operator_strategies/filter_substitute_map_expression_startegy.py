@@ -60,3 +60,8 @@ class FilterSubstituteMapExpressionGeneratorStrategy(BaseGeneratorStrategy):
 
         self._substitutedFilterOperators = [followUpFilter1, followUpFilter2]
         self._mapToSubstitute = baseMap
+
+    def validation(self, schema: Schema) -> bool:
+        if self._assignmentFieldName not in schema.get_numerical_fields():
+            return False
+        return True

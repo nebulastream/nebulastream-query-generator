@@ -25,6 +25,9 @@ class MapExpressionReorderGeneratorStrategy(BaseGeneratorStrategy):
         if not self._expressionFields:
             self.__initializeRandomlyOrderedMapExpression(schema)
 
+        if not self.validation(schema):
+            self.update_columns(schema)
+
         shuffledExpressionField = shuffle_list(self._expressionFields)
 
         # Compute the arithmetic expression
@@ -52,4 +55,25 @@ class MapExpressionReorderGeneratorStrategy(BaseGeneratorStrategy):
                 expressionFields.append(numField)
 
         self._expressionFields = expressionFields
+        self._schema = schema
+
+    def validation(self, schema: Schema) -> bool:
+        if self._assignmentFieldName not in schema.get_numerical_fields():
+            return False
+        return True
+
+    def update_columns(self, schema: Schema):
+        for key, value in schema.get_field_name_mapping().items():
+            if value == self._schema.get_field_name_mapping()[self._assignmentFieldName]:
+                self._assignmentFieldName = key
+                break
+
+        updatedExpressionFields = []
+        for field in self._expressionFields:
+            for key, value in schema.get_field_name_mapping().items():
+                if value == self._schema.get_field_name_mapping()[field]:
+                    updatedExpressionFields.append(key)
+                    break
+
+        self._expressionFields = updatedExpressionFields
         self._schema = schema

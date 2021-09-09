@@ -64,3 +64,8 @@ class FilterEquivalentFilterGeneratorStrategy(BaseGeneratorStrategy):
                     LogicalExpression(FieldAccessExpression(assignmentField), ConstantExpression(str(i)),
                                       LogicalOperators.lt), schema)
                 self._equivalentFilterOperators.append([mapOp, followUpFilter])
+
+    def validation(self, schema: Schema) -> bool:
+        if self._assignmentFieldName not in schema.get_numerical_fields():
+            return False
+        return True
