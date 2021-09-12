@@ -10,7 +10,14 @@ from utils.utils import *
 
 class FilterEquivalentFilterGeneratorStrategy(BaseGeneratorStrategy):
     def __init__(self):
-        self._equivalentFilterOperators: List[List[Operator]] = []
+
+        self._filter1LhsField = None
+        self._filter1RhsField = None
+        self._filter1LogicalOp = None
+        self._filter1ArithOp = None
+        self._filter2LhsField = None
+        self._sendMapAndFilter = None
+        self._schema = None
 
     def generate(self, schema: Schema) -> List[Operator]:
         """
@@ -21,51 +28,75 @@ class FilterEquivalentFilterGeneratorStrategy(BaseGeneratorStrategy):
         :param schema:
         :return:
         """
-        if not self._equivalentFilterOperators:
+        if not self._filter1LhsField:
             self.__initializeEquivalentFilters(schema)
 
-        _, filterOps = random_list_element(self._equivalentFilterOperators)
+        if not self.validation(schema):
+            self.update_columns(schema)
+
+        equivalentFilterOperators = []
+        if self._sendMapAndFilter:
+            for i in range(10):
+                contValue = random_int_between(1, 10)
+                arithExpression1 = ArithmeticExpression(FieldAccessExpression(self._filter1LhsField),
+                                                        ConstantExpression(str(contValue)), self._filter1ArithOp)
+                arithExpression2 = ArithmeticExpression(FieldAccessExpression(self._filter1RhsField),
+                                                        ConstantExpression(str(contValue)), self._filter1ArithOp)
+                filterOp = FilterOperator(
+                    LogicalExpression(arithExpression1, arithExpression2, self._filter1LogicalOp),
+                    schema)
+                equivalentFilterOperators.append([filterOp])
+        else:
+
+            contValue = 10
+            arithExpression = ArithmeticExpression(ConstantExpression(str(contValue)),
+                                                   FieldAccessExpression(self._filter2LhsField),
+                                                   ArithmeticOperators.Mul)
+            mapOp = MapOperator(
+                FieldAssignmentExpression(FieldAccessExpression(self._filter2LhsField), arithExpression),
+                schema)
+            for i in range(31, 39):
+                followUpFilter = FilterOperator(
+                    LogicalExpression(FieldAccessExpression(self._filter2LhsField), ConstantExpression(str(i)),
+                                      LogicalOperators.lt), schema)
+                equivalentFilterOperators.append([mapOp, followUpFilter])
+
+        _, filterOps = random_list_element(equivalentFilterOperators)
         return filterOps
 
     def __initializeEquivalentFilters(self, schema: Schema):
         schemaCopy = deepcopy(schema)
-        option = random_int_between(1, 2)
         intFields = schemaCopy.int_fields
 
-        if option == 1:
-            assignmentFieldName1 = random_field_name(intFields)
-            intFields.remove(assignmentFieldName1)
-            assignmentFieldName2 = random_field_name(intFields)
-            _, arithOperation = random_list_element(list(ArithmeticOperators))
-
-            _, logicalOperation = random_list_element(
-                [LogicalOperators.lt, LogicalOperators.gt, LogicalOperators.lte, LogicalOperators.gte])
-
-            for i in range(10):
-                contValue = random_int_between(1, 10)
-                arithExpression1 = ArithmeticExpression(FieldAccessExpression(assignmentFieldName1),
-                                                        ConstantExpression(str(contValue)), arithOperation)
-                arithExpression2 = ArithmeticExpression(FieldAccessExpression(assignmentFieldName2),
-                                                        ConstantExpression(str(contValue)), arithOperation)
-                filterOp = FilterOperator(
-                    LogicalExpression(arithExpression1, arithExpression2, logicalOperation),
-                    schema)
-                self._equivalentFilterOperators.append([filterOp])
-        else:
-
-            assignmentField = random_field_name(intFields)
-            contValue = 10
-            arithExpression = ArithmeticExpression(ConstantExpression(str(contValue)),
-                                                   FieldAccessExpression(assignmentField), ArithmeticOperators.Mul)
-            mapOp = MapOperator(FieldAssignmentExpression(FieldAccessExpression(assignmentField), arithExpression),
-                                schema)
-            for i in range(31, 39):
-                followUpFilter = FilterOperator(
-                    LogicalExpression(FieldAccessExpression(assignmentField), ConstantExpression(str(i)),
-                                      LogicalOperators.lt), schema)
-                self._equivalentFilterOperators.append([mapOp, followUpFilter])
+        self._filter2LhsField = random_field_name(intFields)
+        self._filter1LhsField = random_field_name(intFields)
+        intFields.remove(self._filter1LhsField)
+        self._filter1RhsField = random_field_name(intFields)
+        _, self._filter1ArithOp = random_list_element(list(ArithmeticOperators))
+        _, self._filter1LogicalOp = random_list_element(
+            [LogicalOperators.lt, LogicalOperators.gt, LogicalOperators.lte, LogicalOperators.gte])
+        self._sendMapAndFilter = random.getrandbits(1)
+        self._schema = schema
 
     def validation(self, schema: Schema) -> bool:
-        if self._assignmentFieldName not in schema.get_numerical_fields():
+        if self._filter1LhsField not in schema.get_numerical_fields():
             return False
         return True
+
+    def update_columns(self, schema: Schema):
+        for key, value in schema.get_field_name_mapping().items():
+            if value == self._schema.get_field_name_mapping()[self._filter1LhsField]:
+                self._filter1LhsField = key
+                break
+
+        for key, value in schema.get_field_name_mapping().items():
+            if value == self._schema.get_field_name_mapping()[self._filter1RhsField]:
+                self._filter1RhsField = key
+                break
+
+        for key, value in schema.get_field_name_mapping().items():
+            if value == self._schema.get_field_name_mapping()[self._filter2LhsField]:
+                self._filter2LhsField = key
+                break
+
+        self._schema = schema

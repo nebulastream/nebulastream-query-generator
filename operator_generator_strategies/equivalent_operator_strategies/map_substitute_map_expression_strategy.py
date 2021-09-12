@@ -11,8 +11,11 @@ from utils.utils import random_list_element, random_int_between, random_field_na
 class MapSubstituteMapExpressionGeneratorStrategy(BaseGeneratorStrategy):
 
     def __init__(self):
-        self._mapToSubstitute: MapOperator = None
-        self._substitutedMapOperators: List[MapOperator] = []
+        self._subMapField = None
+        self._constantValue = None
+        self._followUpAssignmentField = None
+        self._arithOp = None
+        self._schema = None
 
     def generate(self, schema: Schema) -> List[Operator]:
         """
@@ -26,31 +29,56 @@ class MapSubstituteMapExpressionGeneratorStrategy(BaseGeneratorStrategy):
             print("Skipping MapSubstituteMapExpressionGeneratorStrategy as only 1 field is present in the schema")
             return []
 
-        if not self._substitutedMapOperators:
+        if not self._subMapField:
             self.__initializeMapsWithComplexArithmeticExpressions(schema)
-        _, followUpMap = random_list_element(self._substitutedMapOperators)
-        return [self._mapToSubstitute, followUpMap]
+
+        if not self.validation(schema):
+            self.update_columns(schema)
+
+        baseMap = MapOperator(FieldAssignmentExpression(FieldAccessExpression(self._subMapField),
+                                                        ConstantExpression(str(self._constantValue))), schema)
+
+        expression1 = ArithmeticExpression(FieldAccessExpression(self._followUpAssignmentField),
+                                           FieldAccessExpression(self._subMapField), self._arithOp)
+        expression2 = ArithmeticExpression(FieldAccessExpression(self._followUpAssignmentField),
+                                           ConstantExpression(str(self._constantValue)), self._arithOp)
+
+        followUpMap1 = MapOperator(
+            FieldAssignmentExpression(FieldAccessExpression(self._followUpAssignmentField), expression1),
+            schema)
+        followUpMap2 = MapOperator(
+            FieldAssignmentExpression(FieldAccessExpression(self._followUpAssignmentField), expression2),
+            schema)
+
+        _, followUpMap = random_list_element([followUpMap1, followUpMap2])
+        return [baseMap, followUpMap]
 
     def __initializeMapsWithComplexArithmeticExpressions(self, schema: Schema):
         schemaCopy = deepcopy(schema)
         numFields = schemaCopy.get_numerical_fields()
         originalAssignmentFieldName = random_field_name(numFields)
         numFields.remove(originalAssignmentFieldName)
-        contValue = random_int_between(1, 10)
-        baseMap = MapOperator(FieldAssignmentExpression(FieldAccessExpression(originalAssignmentFieldName),
-                                                        ConstantExpression(str(contValue))), schema)
-
-        assignmentFieldName1 = random_field_name(numFields)
+        self._subMapField = originalAssignmentFieldName
+        self._constantValue = random_int_between(1, 10)
+        self._followUpAssignmentField = random_field_name(numFields)
         _, arithOperation = random_list_element(list(ArithmeticOperators))
-        expression1 = ArithmeticExpression(FieldAccessExpression(assignmentFieldName1),
-                                           FieldAccessExpression(originalAssignmentFieldName), arithOperation)
-        expression2 = ArithmeticExpression(FieldAccessExpression(assignmentFieldName1),
-                                           ConstantExpression(str(contValue)), arithOperation)
+        self._arithOp = arithOperation
+        self._schema = schema
 
-        followUpMap1 = MapOperator(FieldAssignmentExpression(FieldAccessExpression(assignmentFieldName1), expression1),
-                                   schema)
-        followUpMap2 = MapOperator(FieldAssignmentExpression(FieldAccessExpression(assignmentFieldName1), expression2),
-                                   schema)
+    def validation(self, schema: Schema) -> bool:
+        if self._subMapField not in schema.get_numerical_fields():
+            return False
+        return True
 
-        self._substitutedMapOperators = [followUpMap1, followUpMap2]
-        self._mapToSubstitute = baseMap
+    def update_columns(self, schema: Schema):
+        for key, value in schema.get_field_name_mapping().items():
+            if value == self._schema.get_field_name_mapping()[self._subMapField]:
+                self._subMapField = key
+                break
+
+        for key, value in schema.get_field_name_mapping().items():
+            if value == self._schema.get_field_name_mapping()[self._followUpAssignmentField]:
+                self._followUpAssignmentField = key
+                break
+
+        self._schema = schema

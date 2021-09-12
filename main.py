@@ -138,8 +138,8 @@ def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: 
     equivalentOperatorGeneratorStrategies = [
         map_expression_reorder_strategy,
         map_operator_reorder_strategy,
-        map_create_new_field_strategy,
-        map_substitute_map_expression_strategy,
+        # map_create_new_field_strategy,
+        # map_substitute_map_expression_strategy,
         filter_substitute_map_expression_strategy,
         filter_expression_reorder_strategy, filter_operator_reorder_strategy,
         filter_equivalent_filter_strategy,
@@ -151,12 +151,14 @@ def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: 
     aggregateGenerator = DistinctAggregationGeneratorStrategy()
     projectGenerator = DistinctProjectionGeneratorStrategy()
     distinctOperatorGeneratorStrategies = [filterGenerator, mapGenerator, aggregateGenerator, projectGenerator,
-                                           mapGenerator, filterGenerator, mapGenerator, filterGenerator]
+                                           mapGenerator]
 
-    distinctOperators = 8 - int((8 * percentageOfEquivalence) / 100)
+    distinctOperators = 5 - int((5 * percentageOfEquivalence) / 100)
     distinctOperatorGenerators = random.sample(distinctOperatorGeneratorStrategies, distinctOperators)
-    equivalentOperatorGenerators = random.sample(equivalentOperatorGeneratorStrategies, 8 - distinctOperators)
-    equivalentOperatorGenerators.append(aggregate_equivalent_aggregate_strategy)
+    equivalentOperatorGenerators = random.sample(equivalentOperatorGeneratorStrategies, 5 - distinctOperators)
+
+    if random.getrandbits(1):
+        equivalentOperatorGenerators.append(aggregate_equivalent_aggregate_strategy)
 
     return QueryGenerator(sourceToUse, numberOfQueriesPerGroup, equivalentOperatorGenerators,
                           distinctOperatorGenerators).generate(binaryOperator)

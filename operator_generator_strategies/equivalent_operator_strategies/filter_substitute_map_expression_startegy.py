@@ -12,8 +12,13 @@ from utils.utils import random_list_element, random_int_between, random_field_na
 class FilterSubstituteMapExpressionGeneratorStrategy(BaseGeneratorStrategy):
 
     def __init__(self):
-        self._mapToSubstitute: MapOperator = None
-        self._substitutedFilterOperators: List[FilterOperator] = []
+
+        self._mapFieldName = None
+        self._contValue = None
+        self._mapAssignmentFieldName = None
+        self._arithOp = None
+        self._logicalOp = None
+        self._schema = None
 
     def generate(self, schema: Schema) -> List[Operator]:
         """
@@ -26,42 +31,55 @@ class FilterSubstituteMapExpressionGeneratorStrategy(BaseGeneratorStrategy):
             print("Skipping FilterSubstituteMapExpressionGeneratorStrategy as only 1 field is present in the schema")
             return []
 
-        if not self._substitutedFilterOperators:
+        if not self._mapFieldName:
             self.__initializeFiltersWithSubstitutedMapExpression(schema)
-        _, followUpMap = random_list_element(self._substitutedFilterOperators)
-        return [self._mapToSubstitute, followUpMap]
+
+        if not self.validation(schema):
+            self.update_columns(schema)
+
+        baseMap = MapOperator(FieldAssignmentExpression(FieldAccessExpression(self._mapFieldName),
+                                                        ConstantExpression(str(self._contValue))), schema)
+        arithExpression1 = ArithmeticExpression(FieldAccessExpression(self._mapAssignmentFieldName),
+                                                FieldAccessExpression(self._mapFieldName), self._arithOp)
+        arithExpression2 = ArithmeticExpression(FieldAccessExpression(self._mapAssignmentFieldName),
+                                                ConstantExpression(str(self._contValue)), self._arithOp)
+
+        followUpFilter1 = FilterOperator(
+            LogicalExpression(FieldAccessExpression(self._mapAssignmentFieldName), arithExpression1, self._logicalOp),
+            schema)
+        followUpFilter2 = FilterOperator(
+            LogicalExpression(FieldAccessExpression(self._mapAssignmentFieldName), arithExpression2, self._logicalOp),
+            schema)
+
+        _, followUpMap = random_list_element([followUpFilter1, followUpFilter2])
+        return [baseMap, followUpMap]
 
     def __initializeFiltersWithSubstitutedMapExpression(self, schema: Schema):
         schemaCopy = deepcopy(schema)
         numFields = schemaCopy.get_numerical_fields()
-        originalAssignmentFieldName = random_field_name(numFields)
-        numFields.remove(originalAssignmentFieldName)
-        contValue = random_int_between(1, 10)
-        baseMap = MapOperator(FieldAssignmentExpression(FieldAccessExpression(originalAssignmentFieldName),
-                                                        ConstantExpression(str(contValue))), schema)
-
-        assignmentFieldName1 = random_field_name(numFields)
-        _, arithOperation = random_list_element(list(ArithmeticOperators))
-
-        arithExpression1 = ArithmeticExpression(FieldAccessExpression(assignmentFieldName1),
-                                                FieldAccessExpression(originalAssignmentFieldName), arithOperation)
-        arithExpression2 = ArithmeticExpression(FieldAccessExpression(assignmentFieldName1),
-                                                ConstantExpression(str(contValue)), arithOperation)
-
-        _, logicalOperation = random_list_element(
+        self._mapFieldName = random_field_name(numFields)
+        numFields.remove(self._mapFieldName)
+        self._contValue = random_int_between(1, 10)
+        self._mapAssignmentFieldName = random_field_name(numFields)
+        _, self._arithOp = random_list_element(list(ArithmeticOperators))
+        _, self._logicalOp = random_list_element(
             [LogicalOperators.lt, LogicalOperators.gt, LogicalOperators.lte, LogicalOperators.gte])
-
-        followUpFilter1 = FilterOperator(
-            LogicalExpression(FieldAccessExpression(assignmentFieldName1), arithExpression1, logicalOperation),
-            schema)
-        followUpFilter2 = FilterOperator(
-            LogicalExpression(FieldAccessExpression(assignmentFieldName1), arithExpression2, logicalOperation),
-            schema)
-
-        self._substitutedFilterOperators = [followUpFilter1, followUpFilter2]
-        self._mapToSubstitute = baseMap
+        self._schema = schema
 
     def validation(self, schema: Schema) -> bool:
-        if self._assignmentFieldName not in schema.get_numerical_fields():
+        if self._mapFieldName not in schema.get_numerical_fields():
             return False
         return True
+
+    def update_columns(self, schema: Schema):
+        for key, value in schema.get_field_name_mapping().items():
+            if value == self._schema.get_field_name_mapping()[self._mapFieldName]:
+                self._mapFieldName = key
+                break
+
+        for key, value in schema.get_field_name_mapping().items():
+            if value == self._schema.get_field_name_mapping()[self._mapAssignmentFieldName]:
+                self._mapAssignmentFieldName = key
+                break
+
+        self._schema = schema
