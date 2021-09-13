@@ -2,10 +2,11 @@ no_queries: 4000
 generate_equivalent_queries: true
 min_query_operators: 4
 max_query_operators: 4
+sources_to_use: 1
 percentage_of_random_queries: 0
 binaryOperator: false
 equivalence_config:
-  no_of_equivalent_query_groups: 400
+  no_of_equivalent_query_groups: 800
   percentage_of_equivalence: 100
 source_list:
   - stream_name: 'example1'
@@ -13,48 +14,48 @@ source_list:
     string_fields: [ ]
     double_fields: [ ]
     timestamp_fields: [ 'a_time', 'b_time' ]
-#  - stream_name: 'example2'
-#    int_fields: [ 'id', 'val', 'X', 'Y' ]
-#    string_fields: [ ]
-#    double_fields: [ ]
-#    timestamp_fields: [ ]
-#  - stream_name: 'example3'
-#    int_fields: [ 'id', 'val', 'X', 'Y' ]
-#    string_fields: [ ]
-#    double_fields: [ ]
-#    timestamp_fields: [ ]
-#  - stream_name: 'example4'
-#    int_fields: [ 'id', 'val', 'X', 'Y' ]
-#    string_fields: [ ]
-#    double_fields: [ ]
-#    timestamp_fields: [ ]
-#  - stream_name: 'example5'
-#    int_fields: [ 'id', 'val', 'X', 'Y' ]
-#    string_fields: [ ]
-#    double_fields: [ ]
-#    timestamp_fields: [ ]
-#  - stream_name: 'example6'
-#    int_fields: [ 'id', 'val', 'X', 'Y' ]
-#    string_fields: [ ]
-#    double_fields: [ ]
-#    timestamp_fields: [ ]
-#  - stream_name: 'example7'
-#    int_fields: [ 'id', 'val', 'X', 'Y' ]
-#    string_fields: [ ]
-#    double_fields: [ ]
-#    timestamp_fields: [ ]
-#  - stream_name: 'example8'
-#    int_fields: [ 'id', 'val', 'X', 'Y' ]
-#    string_fields: [ ]
-#    double_fields: [ ]
-#    timestamp_fields: [ ]
-#  - stream_name: 'example9'
-#    int_fields: [ 'id', 'val', 'X', 'Y' ]
-#    string_fields: [ ]
-#    double_fields: [ ]
-#    timestamp_fields: [ ]
-#  - stream_name: 'example10'
-#    int_fields: [ 'id', 'val', 'X', 'Y' ]
-#    string_fields: [ ]
-#    double_fields: [ ]
-#    timestamp_fields: [ ]
+  - stream_name: 'example2'
+    int_fields: [ 'g', 'h', 'i', 'j', 'k', 'l' ]
+    string_fields: [ ]
+    double_fields: [ ]
+    timestamp_fields: [ 'a_time', 'b_time' ]
+  - stream_name: 'example3'
+    int_fields: [ 'm', 'n', 'o', 'p', 'q', 'r' ]
+    string_fields: [ ]
+    double_fields: [ ]
+    timestamp_fields: [ 'a_time', 'b_time' ]
+  - stream_name: 'example4'
+    int_fields: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
+    string_fields: [ ]
+    double_fields: [ ]
+    timestamp_fields: [ 'a_time', 'b_time' ]
+  - stream_name: 'example5'
+    int_fields: [ 'g', 'h', 'i', 'j', 'k', 'l' ]
+    string_fields: [ ]
+    double_fields: [ ]
+    timestamp_fields: [ 'a_time', 'b_time' ]
+  - stream_name: 'example6'
+    int_fields: [ 'm', 'n', 'o', 'p', 'q', 'r' ]
+    string_fields: [ ]
+    double_fields: [ ]
+    timestamp_fields: [ 'a_time', 'b_time' ]
+  - stream_name: 'example7'
+    int_fields: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
+    string_fields: [ ]
+    double_fields: [ ]
+    timestamp_fields: [ 'a_time', 'b_time' ]
+  - stream_name: 'example8'
+    int_fields: [ 'g', 'h', 'i', 'j', 'k', 'l' ]
+    string_fields: [ ]
+    double_fields: [ ]
+    timestamp_fields: [ 'a_time', 'b_time' ]
+  - stream_name: 'example9'
+    int_fields: [ 'm', 'n', 'o', 'p', 'q', 'r' ]
+    string_fields: [ ]
+    double_fields: [ ]
+    timestamp_fields: [ 'a_time', 'b_time' ]
+  - stream_name: 'example10'
+    int_fields: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
+    string_fields: [ ]
+    double_fields: [ ]
+    timestamp_fields: [ 'a_time', 'b_time' ]

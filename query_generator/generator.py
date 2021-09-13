@@ -1,4 +1,6 @@
 from operator_generator_strategies.base_generator_strategy import BaseGeneratorStrategy
+from operator_generator_strategies.equivalent_operator_strategies.union_equivalent_strategy import \
+    UnionEquivalentUnionGeneratorStrategy
 from operators.map_operator import MapOperator
 from operators.union_operator import UnionOperator
 from query_generator.query import Query
@@ -22,7 +24,7 @@ class QueryGenerator:
         self._distinctOperatorGenerators: List[BaseGeneratorStrategy] = distinctOperatorGenerators
         self._queries: List[Query] = []
 
-    def generate(self, binary: bool=True) -> List[Query]:
+    def generate(self, binary: bool = True) -> List[Query]:
         # self.__inject_source_operators()
         sourceGenerator = DistinctSourceGeneratorStrategy()
         sourceOperator = sourceGenerator.generate(self._schema)
@@ -35,9 +37,13 @@ class QueryGenerator:
 
             # Generate equivalent operators
             for generatorRule in equivalentOperatorGenerators:
-                operators = generatorRule.generate(newQuery.output_schema())
-                for operator in operators:
-                    newQuery.add_operator(operator)
+                if isinstance(generatorRule, UnionEquivalentUnionGeneratorStrategy):
+                    operators = generatorRule.generate(newQuery)
+                    newQuery = Query().add_operator(operators[0])
+                else:
+                    operators = generatorRule.generate(newQuery.output_schema())
+                    for operator in operators:
+                        newQuery.add_operator(operator)
 
             # Generate random operators
             shuffle_list(distinctOperatorGenerators)

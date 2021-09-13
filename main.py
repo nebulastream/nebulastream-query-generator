@@ -24,6 +24,8 @@ from operator_generator_strategies.equivalent_operator_strategies.project_equiva
     ProjectEquivalentProjectGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.aggregation_equivalent_aggregation_strategy import \
     AggregationEquivalentAggregationGeneratorStrategy
+from operator_generator_strategies.equivalent_operator_strategies.union_equivalent_strategy import \
+    UnionEquivalentUnionGeneratorStrategy
 from query_generator.query import Query
 from utils.contracts import Schema
 from operator_generator_strategies.distinct_operator_strategies.distinct_filter_strategy import \
@@ -60,6 +62,7 @@ def run(config_file):
         possibleSources.append(source)
 
     generateEquivalentQueries = configuration['generate_equivalent_queries']
+    sourcesToUse = configuration['sources_to_use']
     numberOfQueries = configuration['no_queries']
     percentageOfRandomQueries = configuration['percentage_of_random_queries']
     # initially the number of random queries equal to number of queries
@@ -73,29 +76,29 @@ def run(config_file):
         numberOfEquivalentQueryGroups = configuration['equivalence_config']['no_of_equivalent_query_groups']
         percentageOfEquivalence = configuration['equivalence_config']['percentage_of_equivalence']
         numberOfQueriesPerGroup = int(numberOfEquivalentQueries / numberOfEquivalentQueryGroups)
-        numberOfGroupsPerSource = int(numberOfEquivalentQueryGroups / len(possibleSources))
+        numberOfGroupsPerSource = int(numberOfEquivalentQueryGroups / sourcesToUse)
         # Iterate over sources
-        for sourceToUse in possibleSources:
-            for i in range(numberOfGroupsPerSource):
+        for i in range(sourcesToUse):
+            for j in range(numberOfGroupsPerSource):
                 # NOTE: this won't work when we need a binary operator in the query
                 generatedQueries = getEquivalentQueries(numberOfQueriesPerGroup, percentageOfEquivalence,
-                                                        binaryOperator, sourceToUse)
+                                                        binaryOperator, possibleSources[i], possibleSources)
                 queries.extend(generatedQueries)
 
         # Populate remaining queries
         remainingQueries = numberOfEquivalentQueries - (
-                numberOfQueriesPerGroup * numberOfGroupsPerSource * len(possibleSources))
+                numberOfQueriesPerGroup * numberOfGroupsPerSource * sourcesToUse)
 
         if remainingQueries > 0:
             # NOTE: this won't work when we need a binary operator in the query
             for i in range(int(remainingQueries / numberOfQueriesPerGroup)):
                 _, sourceToUse = random_list_element(possibleSources)
                 generatedQueries = getEquivalentQueries(numberOfQueriesPerGroup, percentageOfEquivalence,
-                                                        binaryOperator, sourceToUse)
+                                                        binaryOperator, sourceToUse, possibleSources)
                 queries.extend(generatedQueries)
 
     _, sourceToUse = random_list_element(possibleSources)
-    generatedQueries = getRandomQueries(numberOfRandomQueries, binaryOperator, sourceToUse)
+    generatedQueries = getRandomQueries(numberOfRandomQueries, binaryOperator, sourceToUse, possibleSources)
     queries.extend(generatedQueries)
 
     # Write queries into file
@@ -105,7 +108,8 @@ def run(config_file):
             f.write("\n")
 
 
-def getRandomQueries(numberOfQueries: int, binaryOperator: bool, sourceToUse: Schema) -> List[Query]:
+def getRandomQueries(numberOfQueries: int, binaryOperator: bool, sourceToUse: Schema,
+                     possibleSources: List[Schema]) -> List[Query]:
     filter_generator = DistinctFilterGeneratorStrategy(max_number_of_predicates=2)
     map_generator = DistinctMapGeneratorStrategy()
     project_generator = DistinctProjectionGeneratorStrategy()
@@ -121,8 +125,7 @@ def getRandomQueries(numberOfQueries: int, binaryOperator: bool, sourceToUse: Sc
 
 
 def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: int, binaryOperator: bool,
-                         sourceToUse: Schema) -> List[
-    Query]:
+                         sourceToUse: Schema, possibleSources: List[Schema]) -> List[Query]:
     # Initialize instances of each generator strategy
     filter_expression_reorder_strategy = FilterExpressionReorderGeneratorStrategy()
     filter_operator_reorder_strategy = FilterOperatorReorderGeneratorStrategy()
@@ -134,6 +137,7 @@ def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: 
     filter_equivalent_filter_strategy = FilterEquivalentFilterGeneratorStrategy()
     project_equivalent_project_strategy = ProjectEquivalentProjectGeneratorStrategy()
     aggregate_equivalent_aggregate_strategy = AggregationEquivalentAggregationGeneratorStrategy()
+    union_equivalent_strategies = UnionEquivalentUnionGeneratorStrategy(possibleSources)
 
     equivalentOperatorGeneratorStrategies = [
         map_expression_reorder_strategy,
@@ -141,7 +145,8 @@ def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: 
         # map_create_new_field_strategy,
         # map_substitute_map_expression_strategy,
         filter_substitute_map_expression_strategy,
-        filter_expression_reorder_strategy, filter_operator_reorder_strategy,
+        filter_expression_reorder_strategy,
+        filter_operator_reorder_strategy,
         filter_equivalent_filter_strategy,
         project_equivalent_project_strategy
     ]
@@ -157,8 +162,21 @@ def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: 
     distinctOperatorGenerators = random.sample(distinctOperatorGeneratorStrategies, distinctOperators)
     equivalentOperatorGenerators = random.sample(equivalentOperatorGeneratorStrategies, 5 - distinctOperators)
 
-    if random.getrandbits(1):
+    if random.randint(1, 10) % 10 == 0:
+        equivalentOperatorGenerators.append(union_equivalent_strategies)
+
+    if random.randint(1, 5) % 5 == 0:
         equivalentOperatorGenerators.append(aggregate_equivalent_aggregate_strategy)
+
+    maxUnionLoc = -1
+    for i in range(len(equivalentOperatorGenerators)):
+        if isinstance(equivalentOperatorGenerators[i], ProjectEquivalentProjectGeneratorStrategy):
+            maxUnionLoc = i
+        elif isinstance(equivalentOperatorGenerators[i], UnionEquivalentUnionGeneratorStrategy):
+            if i > maxUnionLoc and maxUnionLoc != -1:
+                equivalentOperatorGenerators[maxUnionLoc], equivalentOperatorGenerators[i] = \
+                    equivalentOperatorGenerators[i], equivalentOperatorGenerators[maxUnionLoc]
+            break
 
     return QueryGenerator(sourceToUse, numberOfQueriesPerGroup, equivalentOperatorGenerators,
                           distinctOperatorGenerators).generate(binaryOperator)

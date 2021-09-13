@@ -1,9 +1,6 @@
 from copy import deepcopy
-from typing import List
 
 from operator_generator_strategies.base_generator_strategy import BaseGeneratorStrategy
-from operator_generator_strategies.distinct_operator_strategies.distinct_window_strategy import \
-    DistinctWindowGeneratorStrategy
 from operators.window_operator import WindowOperator
 from operators.aggregation_operator import AggregationOperator
 from utils.contracts import *
