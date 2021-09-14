@@ -1,4 +1,6 @@
 from operator_generator_strategies.base_generator_strategy import BaseGeneratorStrategy
+from operator_generator_strategies.equivalent_operator_strategies.join_equivalent_strategy import \
+    JoinEquivalentJoinGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.union_equivalent_strategy import \
     UnionEquivalentUnionGeneratorStrategy
 from operators.map_operator import MapOperator
@@ -37,7 +39,8 @@ class QueryGenerator:
 
             # Generate equivalent operators
             for generatorRule in equivalentOperatorGenerators:
-                if isinstance(generatorRule, UnionEquivalentUnionGeneratorStrategy):
+                if isinstance(generatorRule, UnionEquivalentUnionGeneratorStrategy) or \
+                        isinstance(generatorRule, JoinEquivalentJoinGeneratorStrategy):
                     operators = generatorRule.generate(newQuery)
                     newQuery = Query().add_operator(operators[0])
                 else:

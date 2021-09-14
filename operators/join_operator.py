@@ -15,4 +15,4 @@ class JoinOperator(Operator):
 
     def generate_code(self) -> str:
         code = f"{self._leftSubQuery.generate_code()}.joinWith({self._rightSubQuery.generate_code()})"
-        return f"{code}.where(Attribute({self._leftCol})).equalsTo(Attribute({self._rightCol})).{self._window.generate_code()}"
+        return f"{code}.where(Attribute(\"{self._leftCol}\")).equalsTo(Attribute(\"{self._rightCol}\")).{self._window.generate_code()}"

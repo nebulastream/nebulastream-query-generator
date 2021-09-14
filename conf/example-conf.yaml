@@ -18,12 +18,12 @@ source_list:
     int_fields: [ 'g', 'h', 'i', 'j', 'k', 'l' ]
     string_fields: [ ]
     double_fields: [ ]
-    timestamp_fields: [ 'a_time', 'b_time' ]
+    timestamp_fields: [ 'g_time', 'h_time' ]
   - stream_name: 'example3'
     int_fields: [ 'm', 'n', 'o', 'p', 'q', 'r' ]
     string_fields: [ ]
     double_fields: [ ]
-    timestamp_fields: [ 'a_time', 'b_time' ]
+    timestamp_fields: [ 'm_time', 'n_time' ]
   - stream_name: 'example4'
     int_fields: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
     string_fields: [ ]
@@ -33,12 +33,12 @@ source_list:
     int_fields: [ 'g', 'h', 'i', 'j', 'k', 'l' ]
     string_fields: [ ]
     double_fields: [ ]
-    timestamp_fields: [ 'a_time', 'b_time' ]
+    timestamp_fields: [ 'g_time', 'h_time' ]
   - stream_name: 'example6'
     int_fields: [ 'm', 'n', 'o', 'p', 'q', 'r' ]
     string_fields: [ ]
     double_fields: [ ]
-    timestamp_fields: [ 'a_time', 'b_time' ]
+    timestamp_fields: [ 'm_time', 'n_time' ]
   - stream_name: 'example7'
     int_fields: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
     string_fields: [ ]
@@ -48,12 +48,12 @@ source_list:
     int_fields: [ 'g', 'h', 'i', 'j', 'k', 'l' ]
     string_fields: [ ]
     double_fields: [ ]
-    timestamp_fields: [ 'a_time', 'b_time' ]
+    timestamp_fields: [ 'g_time', 'h_time' ]
   - stream_name: 'example9'
     int_fields: [ 'm', 'n', 'o', 'p', 'q', 'r' ]
     string_fields: [ ]
     double_fields: [ ]
-    timestamp_fields: [ 'a_time', 'b_time' ]
+    timestamp_fields: [ 'm_time', 'n_time' ]
   - stream_name: 'example10'
     int_fields: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
     string_fields: [ ]

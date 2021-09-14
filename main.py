@@ -8,6 +8,8 @@ from operator_generator_strategies.equivalent_operator_strategies.filter_equival
     FilterEquivalentFilterGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.filter_substitute_map_expression_startegy import \
     FilterSubstituteMapExpressionGeneratorStrategy
+from operator_generator_strategies.equivalent_operator_strategies.join_equivalent_strategy import \
+    JoinEquivalentJoinGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.map_create_new_field_strategy import \
     MapCreateNewFieldGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.map_substitute_map_expression_strategy import \
@@ -138,6 +140,7 @@ def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: 
     project_equivalent_project_strategy = ProjectEquivalentProjectGeneratorStrategy()
     aggregate_equivalent_aggregate_strategy = AggregationEquivalentAggregationGeneratorStrategy()
     union_equivalent_strategies = UnionEquivalentUnionGeneratorStrategy(possibleSources)
+    join_equivalent_strategies = JoinEquivalentJoinGeneratorStrategy(possibleSources)
 
     equivalentOperatorGeneratorStrategies = [
         map_expression_reorder_strategy,
@@ -162,8 +165,13 @@ def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: 
     distinctOperatorGenerators = random.sample(distinctOperatorGeneratorStrategies, distinctOperators)
     equivalentOperatorGenerators = random.sample(equivalentOperatorGeneratorStrategies, 5 - distinctOperators)
 
+    unionPresent = False
     if random.randint(1, 10) % 10 == 0:
         equivalentOperatorGenerators.append(union_equivalent_strategies)
+        unionPresent = True
+
+    if random.randint(1, 10) % 10 == 0 and not unionPresent:
+        equivalentOperatorGenerators.append(join_equivalent_strategies)
 
     if random.randint(1, 5) % 5 == 0:
         equivalentOperatorGenerators.append(aggregate_equivalent_aggregate_strategy)
@@ -172,7 +180,8 @@ def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: 
     for i in range(len(equivalentOperatorGenerators)):
         if isinstance(equivalentOperatorGenerators[i], ProjectEquivalentProjectGeneratorStrategy):
             maxUnionLoc = i
-        elif isinstance(equivalentOperatorGenerators[i], UnionEquivalentUnionGeneratorStrategy):
+        elif isinstance(equivalentOperatorGenerators[i], UnionEquivalentUnionGeneratorStrategy) or isinstance(
+                equivalentOperatorGenerators[i], JoinEquivalentJoinGeneratorStrategy):
             if i > maxUnionLoc and maxUnionLoc != -1:
                 equivalentOperatorGenerators[maxUnionLoc], equivalentOperatorGenerators[i] = \
                     equivalentOperatorGenerators[i], equivalentOperatorGenerators[maxUnionLoc]
