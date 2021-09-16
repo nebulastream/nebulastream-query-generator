@@ -79,9 +79,12 @@ class JoinEquivalentJoinGeneratorStrategy(BaseGeneratorStrategy):
     def __initializeEquivalentJoins(self, schema: Schema):
 
         rightSchemas = []
-        for i in range(len(self._schemas)):
-            if self._schemas[i].get_numerical_fields() != schema.get_numerical_fields():
-                rightSchemas.append(self._schemas[i])
+        if len(self._schemas) > 1:
+            for i in range(len(self._schemas)):
+                if self._schemas[i].get_numerical_fields() != schema.get_numerical_fields():
+                    rightSchemas.append(self._schemas[i])
+        else:
+            rightSchemas = self._schemas
 
         self._rightSchema = random.sample(rightSchemas, 1)[0]
         self._rightSubQuery = Query().add_operator(SourceOperator(self._rightSchema))

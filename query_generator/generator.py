@@ -1,10 +1,16 @@
+from copy import deepcopy
+
 from operator_generator_strategies.base_generator_strategy import BaseGeneratorStrategy
+from operator_generator_strategies.distinct_operator_strategies.distinct_aggregation_strategy import \
+    DistinctAggregationGeneratorStrategy
 from operator_generator_strategies.distinct_operator_strategies.distinct_join_strategy import \
     DistinctJoinGeneratorStrategy
 from operator_generator_strategies.distinct_operator_strategies.distinct_projection_strategy import \
     DistinctProjectionGeneratorStrategy
 from operator_generator_strategies.distinct_operator_strategies.distinct_union_strategy import \
     DistinctUnionGeneratorStrategy
+from operator_generator_strategies.equivalent_operator_strategies.aggregation_equivalent_aggregation_strategy import \
+    AggregationEquivalentAggregationGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.join_equivalent_strategy import \
     JoinEquivalentJoinGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.project_equivalent_strategy import \
@@ -41,7 +47,6 @@ class QueryGenerator:
 
         # reorder operator Generators strategies to generate valid queries
         equivalentOperatorGenerators = self.reorder_generator_strategies(self._equivalentOperatorGenerators)
-        distinctOperatorGenerators = self.reorder_generator_strategies(self._distinctOperatorGenerators)
 
         while len(self._queries) < self._numberOfQueriesToGenerate:
             newQuery = Query().add_operator(sourceOperator)
@@ -57,6 +62,8 @@ class QueryGenerator:
                     for operator in operators:
                         newQuery.add_operator(operator)
 
+            distinctOperatorGenerators = self.shuffle_generator_strategies(deepcopy(self._distinctOperatorGenerators))
+            distinctOperatorGenerators = self.reorder_generator_strategies(distinctOperatorGenerators)
             # Generate random operators
             for generatorRule in distinctOperatorGenerators:
                 if isinstance(generatorRule, DistinctUnionGeneratorStrategy) or \
@@ -90,5 +97,46 @@ class QueryGenerator:
                     generatorStrategies[maxBinaryOpLoc], generatorStrategies[i] = \
                         generatorStrategies[i], generatorStrategies[maxBinaryOpLoc]
                 break
+
+        for i in range(len(generatorStrategies)):
+            if isinstance(generatorStrategies[i], DistinctAggregationGeneratorStrategy) or isinstance(
+                    generatorStrategies[i], AggregationEquivalentAggregationGeneratorStrategy):
+                if i < len(generatorStrategies) - 1:
+                    generatorStrategies[len(generatorStrategies) - 1], generatorStrategies[i] = \
+                        generatorStrategies[i], generatorStrategies[len(generatorStrategies) - 1]
+                break
+
+        return generatorStrategies
+
+    def shuffle_generator_strategies(self, generatorStrategies: List[BaseGeneratorStrategy]) -> List[
+        BaseGeneratorStrategy]:
+
+        if not generatorStrategies:
+            return []
+
+        unionStrategy = None
+        joinStrategy = None
+        aggregationStrategy = None
+
+        for i in range(len(generatorStrategies)):
+            if isinstance(generatorStrategies[i], DistinctUnionGeneratorStrategy):
+                unionStrategy = generatorStrategies[i]
+            elif isinstance(generatorStrategies[i], DistinctJoinGeneratorStrategy):
+                joinStrategy = generatorStrategies[i]
+            elif isinstance(generatorStrategies[i], DistinctAggregationGeneratorStrategy):
+                aggregationStrategy = generatorStrategies[i]
+
+        unionPresent = True
+        if not random.randint(1, 10) % 10 == 0:
+            generatorStrategies.remove(unionStrategy)
+            unionPresent = False
+
+        joinPresent = True
+        if not random.randint(1, 10) % 10 == 0 or unionPresent:
+            generatorStrategies.remove(joinStrategy)
+            joinPresent = False
+
+        if not random.randint(1, 10) % 10 == 0 or joinPresent:
+            generatorStrategies.remove(aggregationStrategy)
 
         return generatorStrategies

@@ -11,7 +11,7 @@ class DistinctWindowGeneratorStrategy(BaseGeneratorStrategy):
     def __init__(self):
         super().__init__()
 
-    def generate(self, schema: Schema) -> List[Operator]:
+    def generate(self, schema: Schema, generateKey: bool = True) -> List[Operator]:
         timestampField = random_field_name(schema.get_timestamp_fields())
         _, windowType = random_list_element([WindowType.tumbling, WindowType.sliding])
         _, timeUnit = random_list_element([TimeUnit.minutes, TimeUnit.seconds])
@@ -24,10 +24,11 @@ class DistinctWindowGeneratorStrategy(BaseGeneratorStrategy):
             windowType = f"{windowType.value}::of(EventTime(Attribute(\"{timestampField}\")), {timeUnit.value}({windowLength}))"
 
         windowKey = ""
-        if bool(random.getrandbits(1)):
+        if generateKey and bool(random.getrandbits(1)):
             windowKey = random_field_name(schema.get_numerical_fields())
 
         schema = Schema(name=schema.name, int_fields=[windowKey], double_fields=[], string_fields=[],
-                        timestamp_fields=["start","end"], fieldNameMapping=schema.get_field_name_mapping())
+                        timestamp_fields=["start", "end", timestampField],
+                        fieldNameMapping=schema.get_field_name_mapping())
         window = WindowOperator(windowType=windowType, windowKey=windowKey, schema=schema)
         return [window]

@@ -1,4 +1,5 @@
 from copy import deepcopy
+import random
 from typing import List
 
 from operator_generator_strategies.base_generator_strategy import BaseGeneratorStrategy
@@ -17,7 +18,8 @@ class DistinctJoinGeneratorStrategy(BaseGeneratorStrategy):
         self._selectedSchemas = schemas
 
     def generate(self, subQuery: Query) -> List[Operator]:
-        shuffledSelectedSchemas = shuffle_list(self._selectedSchemas)
+        shuffledSelectedSchemas = random.sample(self._selectedSchemas, k=1)
+        # shuffledSelectedSchemas = shuffle_list(self._selectedSchemas)
 
         join = None
         for i in range(len(shuffledSelectedSchemas)):
@@ -32,7 +34,7 @@ class DistinctJoinGeneratorStrategy(BaseGeneratorStrategy):
             intFields = leftSchema.get_numerical_fields()
             intFields.extend(rightSchema.get_numerical_fields())
 
-            window = DistinctWindowGeneratorStrategy().generate(leftSchema)[0]
+            window = DistinctWindowGeneratorStrategy().generate(leftSchema, False)[0]
             schema = Schema(name=leftSchema.name + "$" + rightSchema.name,
                             int_fields=intFields,
                             double_fields=[],
