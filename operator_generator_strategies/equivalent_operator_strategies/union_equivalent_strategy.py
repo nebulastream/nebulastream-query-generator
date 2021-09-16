@@ -13,13 +13,9 @@ from utils.contracts import Operator, Schema
 class UnionEquivalentUnionGeneratorStrategy(BaseGeneratorStrategy):
     def __init__(self, schemas: List[Schema]):
         super().__init__()
-        self._schemas = schemas
-        self._selectedSchemas = None
+        self._selectedSchemas = schemas
 
     def generate(self, subQuery: Query) -> List[Operator]:
-        if not self._selectedSchemas:
-            self.initializeStartegy()
-
         shuffledSelectedSchemas = shuffle_list(self._selectedSchemas)
 
         union = None
@@ -31,7 +27,3 @@ class UnionEquivalentUnionGeneratorStrategy(BaseGeneratorStrategy):
             subQuery = Query().add_operator(union)
 
         return [union]
-
-    def initializeStartegy(self):
-        numberOfSchema = random.randint(1, 3)
-        self._selectedSchemas = random.sample(self._schemas, numberOfSchema)

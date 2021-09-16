@@ -33,6 +33,7 @@ class DistinctAggregationGeneratorStrategy(BaseGeneratorStrategy):
             outputField = alias
 
         schema = Schema(name=schema.name, int_fields=[outputField], double_fields=[], string_fields=[],
-                        timestamp_fields=window.get_output_schema().timestamp_fields)
+                        timestamp_fields=window.get_output_schema().timestamp_fields,
+                        fieldNameMapping=schema.get_field_name_mapping())
         aggregationOperator = AggregationOperator(aggregation=aggregation, alias=alias, window=window, schema=schema)
         return [aggregationOperator]

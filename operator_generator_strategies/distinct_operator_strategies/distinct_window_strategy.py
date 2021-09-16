@@ -28,6 +28,6 @@ class DistinctWindowGeneratorStrategy(BaseGeneratorStrategy):
             windowKey = random_field_name(schema.get_numerical_fields())
 
         schema = Schema(name=schema.name, int_fields=[windowKey], double_fields=[], string_fields=[],
-                        timestamp_fields=[])
+                        timestamp_fields=["start","end"], fieldNameMapping=schema.get_field_name_mapping())
         window = WindowOperator(windowType=windowType, windowKey=windowKey, schema=schema)
         return [window]

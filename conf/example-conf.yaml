@@ -1,9 +1,9 @@
 no_queries: 4000
-generate_equivalent_queries: true
+generate_equivalent_queries: false
 min_query_operators: 4
 max_query_operators: 4
 sources_to_use: 1
-percentage_of_random_queries: 0
+percentage_of_random_queries: 100
 binaryOperator: false
 equivalence_config:
   no_of_equivalent_query_groups: 800
@@ -54,8 +54,3 @@ source_list:
     string_fields: [ ]
     double_fields: [ ]
     timestamp_fields: [ 'm_time', 'n_time' ]
-  - stream_name: 'example10'
-    int_fields: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
-    string_fields: [ ]
-    double_fields: [ ]
-    timestamp_fields: [ 'a_time', 'b_time' ]
