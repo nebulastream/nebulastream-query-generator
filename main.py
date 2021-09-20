@@ -76,7 +76,11 @@ def run(config_file):
         numberOfQueriesPerGroup = int(numberOfQueries / numberOfEquivalentQueryGroups)
         # Iterate over sources
         for i in range(numOfDistinctSourcesToUse):
-            numOfSourceToUse = random.randint(2, len(possibleSources))
+
+            numOfSourceToUse = 1
+            if numOfDistinctSourcesToUse > 1:
+                numOfSourceToUse = 2
+
             distinctSourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
             distinctSourcesToUse.sort(key=lambda x: x.name, reverse=False)
             baseSource = distinctSourcesToUse[0]
@@ -92,12 +96,13 @@ def run(config_file):
                 queries.extend(distinctQueries)
 
         # Populate remaining queries
-        remainingQueries = numberOfQueries - (numberOfQueriesPerGroup * numberOfGroupsPerSource * numOfDistinctSourcesToUse)
+        remainingQueries = numberOfQueries - (
+                numberOfQueriesPerGroup * numberOfGroupsPerSource * numOfDistinctSourcesToUse)
         if remainingQueries > 0:
             for i in range(int(remainingQueries / numberOfQueriesPerGroup)):
                 numOfSourceToUse = random.randint(2, len(possibleSources))
                 distinctSourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
-                distinctSourcesToUse.sort()
+                distinctSourcesToUse.sort(key=lambda x: x.name, reverse=False)
                 baseSource = distinctSourcesToUse[0]
                 distinctSourcesToUse.remove(baseSource)
                 equivalentQueries = getEquivalentQueries(numberOfQueriesPerGroup, percentageOfEquivalence,
@@ -106,7 +111,9 @@ def run(config_file):
     else:
         numberOfDistinctQueriesPerSource = numberOfQueries / numOfDistinctSourcesToUse
         for i in range(numOfDistinctSourcesToUse):
-            numOfSourceToUse = random.randint(2, 4)
+            numOfSourceToUse = 1
+            if numOfDistinctSourcesToUse > 1:
+                numOfSourceToUse = 2
             distinctSourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
             distinctSourcesToUse.sort(key=lambda x: x.name, reverse=False)
             baseSource = distinctSourcesToUse[0]
@@ -175,13 +182,14 @@ def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: 
     distinctOperatorGenerators = random.sample(distinctOperatorGeneratorStrategies, distinctOperators)
     equivalentOperatorGenerators = random.sample(equivalentOperatorGeneratorStrategies, 5 - distinctOperators)
 
-    unionPresent = False
-    if random.randint(1, 10) % 10 == 0:
-        equivalentOperatorGenerators.append(union_equivalent_strategies)
-        unionPresent = True
+    if len(possibleSources) >= 1:
+        unionPresent = False
+        if random.randint(1, 2) % 2 == 0:
+            equivalentOperatorGenerators.append(union_equivalent_strategies)
+            unionPresent = True
 
-    if random.randint(1, 10) % 10 == 0 and not unionPresent:
-        equivalentOperatorGenerators.append(join_equivalent_strategies)
+        if not unionPresent:
+            equivalentOperatorGenerators.append(join_equivalent_strategies)
 
     if random.randint(1, 5) % 5 == 0:
         equivalentOperatorGenerators.append(aggregate_equivalent_aggregate_strategy)

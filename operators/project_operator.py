@@ -13,7 +13,7 @@ class ProjectOperator(Operator):
         code = f"project("
         if self._newFieldNames:
             for i in range(len(self._fieldsToProject)):
-                code = code + f"Attribute(\"{self._fieldsToProject[i]}\").rename(\"{self._newFieldNames[i]}\"),"
+                code = code + f"Attribute(\"{self._fieldsToProject[i]}\").as(\"{self._newFieldNames[i]}\"),"
         else:
             for i in range(len(self._fieldsToProject)):
                 code = code + f"Attribute(\"{self._fieldsToProject[i]}\"),"

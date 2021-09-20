@@ -71,9 +71,16 @@ class JoinEquivalentJoinGeneratorStrategy(BaseGeneratorStrategy):
                         double_fields=[], string_fields=[],
                         timestamp_fields=window.get_output_schema().timestamp_fields,
                         fieldNameMapping={})
-        joinOperator = JoinOperator(schema=schema, leftSubQuery=leftSubQuery, rightSubQuery=self._rightSubQuery,
-                                    window=window,
-                                    leftCol=self._leftCol, rightCol=self._rightCol)
+
+        joinOperator = None
+        if random.getrandbits(1):
+            joinOperator = JoinOperator(schema=schema, leftSubQuery=leftSubQuery, rightSubQuery=self._rightSubQuery,
+                                        window=window,
+                                        leftCol=self._leftCol, rightCol=self._rightCol)
+        else:
+            joinOperator = JoinOperator(schema=schema, leftSubQuery=self._rightSubQuery, rightSubQuery=leftSubQuery,
+                                        window=window,
+                                        leftCol=self._rightCol, rightCol=self._leftCol)
         return [joinOperator]
 
     def __initializeEquivalentJoins(self, schema: Schema):
