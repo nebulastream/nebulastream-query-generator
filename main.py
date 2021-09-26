@@ -56,70 +56,93 @@ def run(config_file):
     print(configuration)
 
     possibleSources = []
-    for sourceConf in configuration['source_list']:
-        source = Schema(name=sourceConf['stream_name'], int_fields=sourceConf['int_fields'],
-                        string_fields=sourceConf['string_fields'],
-                        timestamp_fields=sourceConf['timestamp_fields'], double_fields=sourceConf['double_fields'],
+    for sourceConf in configuration['sourceList']:
+        source = Schema(name=sourceConf['streamName'], int_fields=sourceConf['intFields'],
+                        string_fields=sourceConf['stringFields'],
+                        timestamp_fields=sourceConf['timestampFields'], double_fields=sourceConf['doubleFields'],
                         fieldNameMapping={})
         possibleSources.append(source)
 
-    generateEquivalentQueries = configuration['generate_equivalent_queries']
-    numOfDistinctSourcesToUse = configuration['sources_to_use']
-    numberOfQueries = configuration['no_queries']
+    generateEquivalentQueries = configuration['generateEquivalentQueries']
+    numOfDistinctSourcesToUse = configuration['sourcesToUse']
+    numberOfQueries = configuration['noQueries']
+    workloadType = configuration['workloadType']
 
-    queries: List[Query] = []
-    if generateEquivalentQueries:
-        percentageOfRandomQueries = configuration['equivalence_config']['percentage_of_random_queries']
-        numberOfEquivalentQueryGroups = configuration['equivalence_config']['no_of_equivalent_query_groups']
-        percentageOfEquivalence = configuration['equivalence_config']['percentage_of_equivalence']
-        numberOfGroupsPerSource = int(numberOfEquivalentQueryGroups / numOfDistinctSourcesToUse)
-        numberOfQueriesPerGroup = int(numberOfQueries / numberOfEquivalentQueryGroups)
-        # Iterate over sources
-        for i in range(numOfDistinctSourcesToUse):
+    equivalentQueries: List[Query] = []
+    distinctQueries: List[Query] = []
 
-            numOfSourceToUse = 1
-            if numOfDistinctSourcesToUse > 1:
-                numOfSourceToUse = 2
+    if workloadType == "Normal":
 
-            distinctSourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
-            distinctSourcesToUse.sort(key=lambda x: x.name, reverse=False)
-            baseSource = distinctSourcesToUse[0]
-            distinctSourcesToUse.remove(baseSource)
-            for j in range(numberOfGroupsPerSource):
-                # NOTE: this won't work when we need a binary operator in the query
-                randomQueries = int((numberOfQueriesPerGroup * percentageOfRandomQueries) / 100)
-                equivalentQueries = getEquivalentQueries(numberOfQueriesPerGroup - randomQueries,
-                                                         percentageOfEquivalence,
-                                                         baseSource, distinctSourcesToUse)
-                distinctQueries = getDistinctQueries(randomQueries, baseSource, distinctSourcesToUse)
-                queries.extend(equivalentQueries)
-                queries.extend(distinctQueries)
+        if generateEquivalentQueries:
+            percentageOfRandomQueries = configuration['equivalenceConfig']['percentageOfRandomQueries']
+            numberOfEquivalentQueryGroups = configuration['equivalenceConfig']['noOfEquivalentQueryGroups']
+            percentageOfEquivalence = configuration['equivalenceConfig']['percentageOfEquivalence']
+            numberOfGroupsPerSource = int(numberOfEquivalentQueryGroups / numOfDistinctSourcesToUse)
+            numberOfQueriesPerGroup = int(numberOfQueries / numberOfEquivalentQueryGroups)
+            # Iterate over sources
+            for i in range(numOfDistinctSourcesToUse):
 
-        # Populate remaining queries
-        remainingQueries = numberOfQueries - (
-                numberOfQueriesPerGroup * numberOfGroupsPerSource * numOfDistinctSourcesToUse)
-        if remainingQueries > 0:
-            for i in range(int(remainingQueries / numberOfQueriesPerGroup)):
-                numOfSourceToUse = random.randint(2, len(possibleSources))
+                numOfSourceToUse = random.randint(1, 2)
                 distinctSourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
                 distinctSourcesToUse.sort(key=lambda x: x.name, reverse=False)
                 baseSource = distinctSourcesToUse[0]
                 distinctSourcesToUse.remove(baseSource)
-                equivalentQueries = getEquivalentQueries(numberOfQueriesPerGroup, percentageOfEquivalence,
-                                                         baseSource, distinctSourcesToUse)
-                queries.extend(equivalentQueries)
-    else:
-        numberOfDistinctQueriesPerSource = numberOfQueries / numOfDistinctSourcesToUse
+                for j in range(numberOfGroupsPerSource):
+                    # NOTE: this won't work when we need a binary operator in the query
+                    randomQueries = int((numberOfQueriesPerGroup * percentageOfRandomQueries) / 100)
+                    equivalentQueries.extend(getEquivalentQueries(numberOfQueriesPerGroup - randomQueries,
+                                                                  percentageOfEquivalence,
+                                                                  baseSource, distinctSourcesToUse))
+                    distinctQueries.extend(getDistinctQueries(randomQueries, baseSource, distinctSourcesToUse))
+
+            # Populate remaining queries
+            remainingQueries = numberOfQueries - (
+                    numberOfQueriesPerGroup * numberOfGroupsPerSource * numOfDistinctSourcesToUse)
+            if remainingQueries > 0:
+                for i in range(int(remainingQueries / numberOfQueriesPerGroup)):
+                    numOfSourceToUse = random.randint(2, len(possibleSources))
+                    distinctSourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
+                    distinctSourcesToUse.sort(key=lambda x: x.name, reverse=False)
+                    baseSource = distinctSourcesToUse[0]
+                    distinctSourcesToUse.remove(baseSource)
+                    equivalentQueries.extend(getEquivalentQueries(numberOfQueriesPerGroup, percentageOfEquivalence,
+                                                                  baseSource, distinctSourcesToUse))
+
+        else:
+            numberOfDistinctQueriesPerSource = numberOfQueries / numOfDistinctSourcesToUse
+            for i in range(numOfDistinctSourcesToUse):
+                numOfSourceToUse = 1
+                if numOfDistinctSourcesToUse > 1:
+                    numOfSourceToUse = 2
+                distinctSourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
+                distinctSourcesToUse.sort(key=lambda x: x.name, reverse=False)
+                baseSource = distinctSourcesToUse[0]
+                distinctSourcesToUse.remove(baseSource)
+                distinctQueries.extend(
+                    getDistinctQueries(numberOfDistinctQueriesPerSource, baseSource, distinctSourcesToUse))
+    elif workloadType == "BiasedForHybrid":
+        percentageOfRandomQueries = configuration['equivalenceConfig']['percentageOfRandomQueries']
+        numberOfEquivalentQueryGroups = configuration['equivalenceConfig']['noOfEquivalentQueryGroups']
+        percentageOfEquivalence = configuration['equivalenceConfig']['percentageOfEquivalence']
+        numberOfGroupsPerSource = int(numberOfEquivalentQueryGroups / numOfDistinctSourcesToUse)
+        numberOfQueriesPerGroup = int(numberOfQueries / numberOfEquivalentQueryGroups)
+        # Iterate over sources
         for i in range(numOfDistinctSourcesToUse):
-            numOfSourceToUse = 1
-            if numOfDistinctSourcesToUse > 1:
-                numOfSourceToUse = 2
+            numOfSourceToUse = random.randint(1, 2)
             distinctSourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
             distinctSourcesToUse.sort(key=lambda x: x.name, reverse=False)
             baseSource = distinctSourcesToUse[0]
             distinctSourcesToUse.remove(baseSource)
-            distinctQueries = getDistinctQueries(numberOfDistinctQueriesPerSource, baseSource, distinctSourcesToUse)
-            queries.extend(distinctQueries)
+            # NOTE: this won't work when we need a binary operator in the query
+            equivalentQueries.extend(getEquivalentQueriesForHybrid(numberOfGroupsPerSource, numberOfQueriesPerGroup,
+                                                                   percentageOfEquivalence,
+                                                                   baseSource, distinctSourcesToUse))
+
+    queries: List[Query] = []
+    queries.extend(equivalentQueries)
+    queries.extend(distinctQueries)
+
+    # random.shuffle(queries)
 
     # Write queries into file
     with open("generated_queries.txt", "w+") as f:
@@ -138,7 +161,8 @@ def getDistinctQueries(numberOfQueriesToGenerate: int, baseSource: Schema, possi
     join_generator = DistinctJoinGeneratorStrategy(possibleSources)
     distinctOperatorGeneratorStrategies = [filter_generator, map_generator, project_generator, union_generator,
                                            join_generator, aggregation_generator]
-    return QueryGenerator(baseSource, numberOfQueriesToGenerate, [], distinctOperatorGeneratorStrategies).generate()
+    return QueryGenerator(baseSource, possibleSources, numberOfQueriesToGenerate, [],
+                          distinctOperatorGeneratorStrategies).generate()
 
 
 def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: int, baseSource: Schema,
@@ -191,11 +215,66 @@ def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: 
         if not unionPresent:
             equivalentOperatorGenerators.append(join_equivalent_strategies)
 
+    if random.randint(1, 5) % 5 == 0 and distinctOperators == 0:
+        equivalentOperatorGenerators.append(aggregate_equivalent_aggregate_strategy)
+
+    return QueryGenerator(baseSource, possibleSources, numberOfQueriesPerGroup, equivalentOperatorGenerators,
+                          distinctOperatorGenerators).generate()
+
+
+def getEquivalentQueriesForHybrid(numberOfGroupsPerSource: int, numberOfQueriesPerGroup: int,
+                                  percentageOfEquivalence: int,
+                                  baseSource: Schema,
+                                  possibleSources: List[Schema]) -> List[Query]:
+    # Initialize instances of each generator strategy
+    filter_expression_reorder_strategy = FilterExpressionReorderGeneratorStrategy()
+    filter_operator_reorder_strategy = FilterOperatorReorderGeneratorStrategy()
+    map_expression_reorder_strategy = MapExpressionReorderGeneratorStrategy()
+    map_operator_reorder_strategy = MapOperatorReorderGeneratorStrategy()
+    filter_substitute_map_expression_strategy = FilterSubstituteMapExpressionGeneratorStrategy()
+    filter_equivalent_filter_strategy = FilterEquivalentFilterGeneratorStrategy()
+    project_equivalent_project_strategy = ProjectEquivalentProjectGeneratorStrategy()
+    aggregate_equivalent_aggregate_strategy = AggregationEquivalentAggregationGeneratorStrategy()
+
+    # Remove the base source from possible sources for binary operator and initialize generator strategies
+    union_equivalent_strategies = UnionEquivalentUnionGeneratorStrategy(possibleSources)
+
+    equivalentOperatorGeneratorStrategies = [
+        map_expression_reorder_strategy,
+        map_operator_reorder_strategy,
+        filter_substitute_map_expression_strategy,
+        filter_expression_reorder_strategy,
+        filter_operator_reorder_strategy,
+        filter_equivalent_filter_strategy,
+        project_equivalent_project_strategy
+    ]
+
+    filterGenerator = DistinctFilterGeneratorStrategy(max_number_of_predicates=2)
+    mapGenerator = DistinctMapGeneratorStrategy1()
+    aggregateGenerator = DistinctAggregationGeneratorStrategy()
+    projectGenerator = DistinctProjectionGeneratorStrategy()
+    distinctOperatorGeneratorStrategies = [filterGenerator, mapGenerator, aggregateGenerator, projectGenerator,
+                                           mapGenerator]
+
+    distinctOperators = 5 - int((5 * percentageOfEquivalence) / 100)
+    distinctOperatorGenerators = random.sample(distinctOperatorGeneratorStrategies, distinctOperators)
+    equivalentOperatorGenerators = random.sample(equivalentOperatorGeneratorStrategies, 5)
+
+    if random.randint(1, 2) % 2 == 0:
+        equivalentOperatorGenerators.append(union_equivalent_strategies)
+
     if random.randint(1, 5) % 5 == 0:
         equivalentOperatorGenerators.append(aggregate_equivalent_aggregate_strategy)
 
-    return QueryGenerator(baseSource, numberOfQueriesPerGroup, equivalentOperatorGenerators,
-                          distinctOperatorGenerators).generate()
+    queries: List[Query] = []
+    generator = QueryGenerator(baseSource, possibleSources, 1, equivalentOperatorGenerators,
+                               distinctOperatorGenerators)
+    for i in range(numberOfGroupsPerSource):
+        temp = generator.generate()
+        for j in range(numberOfQueriesPerGroup):
+            queries.extend(temp)
+
+    return queries
 
 
 if __name__ == '__main__':

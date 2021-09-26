@@ -31,14 +31,14 @@ from utils.utils import *
 
 
 class QueryGenerator:
-    def __init__(self, sourceToUse: Schema, numberOfQueriesToGenerate: int,
+    def __init__(self, sourceToUse: Schema, possibleSources: List[Schema], numberOfQueriesToGenerate: int,
                  equivalentOperatorGenerators: List[BaseGeneratorStrategy],
                  distinctOperatorGenerators: List[BaseGeneratorStrategy]):
         self._schema = sourceToUse
+        self._possibleSources = possibleSources
         self._numberOfQueriesToGenerate = numberOfQueriesToGenerate
         self._equivalentOperatorGenerators: List[BaseGeneratorStrategy] = equivalentOperatorGenerators
         self._distinctOperatorGenerators: List[BaseGeneratorStrategy] = distinctOperatorGenerators
-        self._queries: List[Query] = []
 
     def generate(self) -> List[Query]:
         # self.__inject_source_operators()
@@ -48,7 +48,8 @@ class QueryGenerator:
         # reorder operator Generators strategies to generate valid queries
         equivalentOperatorGenerators = self.reorder_generator_strategies(self._equivalentOperatorGenerators)
 
-        while len(self._queries) < self._numberOfQueriesToGenerate:
+        queries: List[Query] = []
+        while len(queries) < self._numberOfQueriesToGenerate:
             newQuery = Query().add_operator(sourceOperator)
 
             # Generate equivalent operators
@@ -79,9 +80,9 @@ class QueryGenerator:
             outputSchema = newQuery.output_schema()
             sinkOperator = DistinctSinkGeneratorStrategy().generate(outputSchema)
             newQuery.add_operator(sinkOperator)
-            self._queries.append(newQuery)
+            queries.append(newQuery)
 
-        return self._queries
+        return queries
 
     def reorder_generator_strategies(self, generatorStrategies: List[BaseGeneratorStrategy]) -> \
             List[BaseGeneratorStrategy]:
@@ -111,6 +112,8 @@ class QueryGenerator:
     def shuffle_generator_strategies(self, generatorStrategies: List[BaseGeneratorStrategy]) -> List[
         BaseGeneratorStrategy]:
 
+        random.shuffle(generatorStrategies)
+
         if not generatorStrategies:
             return []
 
@@ -127,16 +130,22 @@ class QueryGenerator:
                 aggregationStrategy = generatorStrategies[i]
 
         unionPresent = True
-        if not random.randint(1, 10) % 10 == 0:
-            generatorStrategies.remove(unionStrategy)
-            unionPresent = False
-
         joinPresent = True
-        if not random.randint(1, 10) % 10 == 0 or unionPresent:
+
+        if len(self._possibleSources) == 0 and unionStrategy and joinStrategy:
+            generatorStrategies.remove(unionStrategy)
             generatorStrategies.remove(joinStrategy)
             joinPresent = False
+        else:
+            if not random.randint(1, 10) % 10 == 0 and unionStrategy:
+                generatorStrategies.remove(unionStrategy)
+                unionPresent = False
 
-        if not random.randint(1, 10) % 10 == 0 or joinPresent:
+            if unionPresent and joinStrategy:
+                generatorStrategies.remove(joinStrategy)
+                joinPresent = False
+
+        if (not random.randint(1, 10) % 10 == 0 or joinPresent) and aggregationStrategy:
             generatorStrategies.remove(aggregationStrategy)
 
         return generatorStrategies
