@@ -2,11 +2,11 @@ noQueries: 1000
 # Value can be Normal or BiasedForHybrid
 workloadType: Normal
 generateEquivalentQueries: true
-sourcesToUse: 4
+sourcesToUse: 1
 equivalenceConfig:
   percentageOfRandomQueries: 0
   noOfEquivalentQueryGroups: 10
-  percentageOfEquivalence: 80
+  percentageOfEquivalence: 100
 sourceList:
   - streamName: 'example1'
     intFields: [ 'a', 'b', 'c', 'd', 'e', 'f' ]

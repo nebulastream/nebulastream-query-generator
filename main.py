@@ -77,17 +77,16 @@ def run(config_file):
             percentageOfRandomQueries = configuration['equivalenceConfig']['percentageOfRandomQueries']
             numberOfEquivalentQueryGroups = configuration['equivalenceConfig']['noOfEquivalentQueryGroups']
             percentageOfEquivalence = configuration['equivalenceConfig']['percentageOfEquivalence']
-            numberOfGroupsPerSource = int(numberOfEquivalentQueryGroups / numOfDistinctSourcesToUse)
-            numberOfQueriesPerGroup = int(numberOfQueries / numberOfEquivalentQueryGroups)
+            numberOfQueriesPerSource = int(numberOfQueries / numOfDistinctSourcesToUse)
+            numberOfQueriesPerGroup = int(numberOfQueriesPerSource / numberOfEquivalentQueryGroups)
             # Iterate over sources
             for i in range(numOfDistinctSourcesToUse):
-
                 numOfSourceToUse = random.randint(1, 2)
                 distinctSourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
                 distinctSourcesToUse.sort(key=lambda x: x.name, reverse=False)
                 baseSource = distinctSourcesToUse[0]
                 distinctSourcesToUse.remove(baseSource)
-                for j in range(numberOfGroupsPerSource):
+                for j in range(numberOfEquivalentQueryGroups):
                     # NOTE: this won't work when we need a binary operator in the query
                     randomQueries = int((numberOfQueriesPerGroup * percentageOfRandomQueries) / 100)
                     equivalentQueries.extend(getEquivalentQueries(numberOfQueriesPerGroup - randomQueries,
@@ -96,15 +95,14 @@ def run(config_file):
                     distinctQueries.extend(getDistinctQueries(randomQueries, baseSource, distinctSourcesToUse))
 
             # Populate remaining queries
-            remainingQueries = numberOfQueries - (
-                    numberOfQueriesPerGroup * numberOfGroupsPerSource * numOfDistinctSourcesToUse)
+            remainingQueries = numberOfQueries - (numberOfQueriesPerGroup * numOfDistinctSourcesToUse * numberOfEquivalentQueryGroups)
             if remainingQueries > 0:
+                numOfSourceToUse = random.randint(1, 2)
+                distinctSourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
+                distinctSourcesToUse.sort(key=lambda x: x.name, reverse=False)
+                baseSource = distinctSourcesToUse[0]
+                distinctSourcesToUse.remove(baseSource)
                 for i in range(int(remainingQueries / numberOfQueriesPerGroup)):
-                    numOfSourceToUse = random.randint(2, len(possibleSources))
-                    distinctSourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
-                    distinctSourcesToUse.sort(key=lambda x: x.name, reverse=False)
-                    baseSource = distinctSourcesToUse[0]
-                    distinctSourcesToUse.remove(baseSource)
                     equivalentQueries.extend(getEquivalentQueries(numberOfQueriesPerGroup, percentageOfEquivalence,
                                                                   baseSource, distinctSourcesToUse))
 
