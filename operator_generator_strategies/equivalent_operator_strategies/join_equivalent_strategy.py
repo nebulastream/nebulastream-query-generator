@@ -67,9 +67,15 @@ class JoinEquivalentJoinGeneratorStrategy(BaseGeneratorStrategy):
         window = WindowOperator(windowType=windowType, windowKey=self._joinKey, schema=schema)
 
         outputIntFields = self._leftSchema.get_numerical_fields() + self._rightSchema.get_numerical_fields()
+
+        timeStampFields =[]
+        for timeStampField in window.get_output_schema().timestamp_fields:
+            if timeStampField != "start" and timeStampField != "end":
+                timeStampFields.append(timeStampField)
+
         schema = Schema(name=self._leftSchema.name + "$" + self._rightSchema.name, int_fields=outputIntFields,
                         double_fields=[], string_fields=[],
-                        timestamp_fields=window.get_output_schema().timestamp_fields,
+                        timestamp_fields=timeStampFields,
                         fieldNameMapping={})
 
         joinOperator = None

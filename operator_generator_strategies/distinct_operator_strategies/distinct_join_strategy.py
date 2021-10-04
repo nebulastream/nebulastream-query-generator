@@ -35,10 +35,16 @@ class DistinctJoinGeneratorStrategy(BaseGeneratorStrategy):
             intFields.extend(rightSchema.get_numerical_fields())
 
             window = DistinctWindowGeneratorStrategy().generate(leftSchema, False)[0]
+
+            timeStampFields = []
+            for timeStampField in window.get_output_schema().timestamp_fields:
+                if timeStampField != "start" and timeStampField != "end":
+                    timeStampFields.append(timeStampField)
+
             schema = Schema(name=leftSchema.name + "$" + rightSchema.name,
                             int_fields=intFields,
                             double_fields=[],
-                            timestamp_fields=window.get_output_schema().timestamp_fields, string_fields=[],
+                            timestamp_fields=timeStampFields, string_fields=[],
                             fieldNameMapping=fieldMapping)
 
             rightSubQuery = Query().add_operator(SourceOperator(rightSchema))

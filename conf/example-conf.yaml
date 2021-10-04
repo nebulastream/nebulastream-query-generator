@@ -1,11 +1,11 @@
-noQueries: 1000
+noQueries: 4000
 # Value can be Normal or BiasedForHybrid
 workloadType: Normal
 generateEquivalentQueries: true
-sourcesToUse: 1
+sourcesToUse: 4
 equivalenceConfig:
-  percentageOfRandomQueries: 0
-  noOfEquivalentQueryGroups: 10
+  percentageOfRandomQueries: 80
+  noOfEquivalentQueryGroups: 100
   percentageOfEquivalence: 100
 sourceList:
   - streamName: 'example1'

@@ -140,7 +140,7 @@ def run(config_file):
     queries.extend(equivalentQueries)
     queries.extend(distinctQueries)
 
-    # random.shuffle(queries)
+    random.shuffle(queries)
 
     # Write queries into file
     with open("generated_queries.txt", "w+") as f:
