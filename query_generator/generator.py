@@ -87,6 +87,14 @@ class QueryGenerator:
     def reorder_generator_strategies(self, generatorStrategies: List[BaseGeneratorStrategy]) -> \
             List[BaseGeneratorStrategy]:
 
+        for i in range(len(generatorStrategies)):
+            if isinstance(generatorStrategies[i], DistinctAggregationGeneratorStrategy) or isinstance(
+                    generatorStrategies[i], AggregationEquivalentAggregationGeneratorStrategy):
+                if i < len(generatorStrategies) - 1:
+                    generatorStrategies[len(generatorStrategies) - 1], generatorStrategies[i] = \
+                        generatorStrategies[i], generatorStrategies[len(generatorStrategies) - 1]
+                break
+
         maxBinaryOpLoc = -1
         for i in range(len(generatorStrategies)):
             if isinstance(generatorStrategies[i], ProjectEquivalentProjectGeneratorStrategy) or \
@@ -97,14 +105,6 @@ class QueryGenerator:
                 if i > maxBinaryOpLoc != -1:
                     generatorStrategies[maxBinaryOpLoc], generatorStrategies[i] = \
                         generatorStrategies[i], generatorStrategies[maxBinaryOpLoc]
-                break
-
-        for i in range(len(generatorStrategies)):
-            if isinstance(generatorStrategies[i], DistinctAggregationGeneratorStrategy) or isinstance(
-                    generatorStrategies[i], AggregationEquivalentAggregationGeneratorStrategy):
-                if i < len(generatorStrategies) - 1:
-                    generatorStrategies[len(generatorStrategies) - 1], generatorStrategies[i] = \
-                        generatorStrategies[i], generatorStrategies[len(generatorStrategies) - 1]
                 break
 
         return generatorStrategies
