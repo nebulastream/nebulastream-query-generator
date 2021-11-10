@@ -45,15 +45,16 @@ Fourth, the Generator iterates over the Operator Strategies and computes partial
 
 ### Generating Synthetic Query Set
 
-The Query Generator takes as inputs the total number of queries to generate, a collection of distinct
+<p style='text-align: justify;'> The Query Generator takes as inputs the total number of queries to generate, a collection of distinct
 sources to use, number of equivalent query groups to produce, the percentage of semantically distinct queries to generate,
 and a percentage of equivalence among semantically equivalent queries.
-The Query Generator then generates the queries using the five-Step process.
- 1. The Query Generator calculates the number of queries per source by dividing total number of queries by the number of sources.
- 2. For each distinct source, the Query Generator calculates number of queries in each equivalent query group.
- 3. The generator computes semantically distinct queries based on the percentage of semantically distinct queries to generate for each group.
- 4. The generator calculates the number of equivalent queries to generate within the group. 
- 5. The generator based on the value of percentage of equivalence among semantically equivalent queries generate remaining queries in the group
+The Query Generator then generates the queries using the following five-Step process: </p>
+
+1. The Query Generator calculates the number of queries per source by dividing total number of queries by the number of sources.
+2. For each distinct source, the Query Generator calculates number of queries in each equivalent query group.
+3. The generator computes semantically distinct queries based on the percentage of semantically distinct queries to generate for each group.
+4. The generator calculates the number of equivalent queries to generate within the group.
+5. The generator based on the value of percentage of equivalence among semantically equivalent queries generate remaining queries in the group
 
 # Installation
 
