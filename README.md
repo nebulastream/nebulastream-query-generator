@@ -36,12 +36,14 @@ Second, the Generator iterates over the selected Equivalent Operator Strategies 
 
 ### Generating A Partially Equivalent Query
 
+<p style='text-align: justify;'>
 Our Query Generator can generate a collection of partially equal queries based on a synthetic query.
 To this end, our Query Generator follows a four-step process.
 First, the Query Generator selects the upstream operators from the synthetic query for partial equivalence.
 Second, the Generator initializes a set of Equivalent Operator Strategies for the selected operators.
 Third, the Generator combines the Equivalent Operator Strategies with a set of Distinct Operator Strategies.
 Fourth, the Generator iterates over the Operator Strategies and computes partially equivalent synthetic query.
+</p>
 
 ### Generating Synthetic Query Set
 
