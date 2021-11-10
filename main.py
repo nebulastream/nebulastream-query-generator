@@ -119,7 +119,6 @@ def run(config_file):
                 distinctQueries.extend(
                     getDistinctQueries(numberOfDistinctQueriesPerSource, baseSource, distinctSourcesToUse))
     elif workloadType == "BiasedForHybrid":
-        percentageOfRandomQueries = configuration['equivalenceConfig']['percentageOfRandomQueries']
         numberOfEquivalentQueryGroups = configuration['equivalenceConfig']['noOfEquivalentQueryGroups']
         percentageOfEquivalence = configuration['equivalenceConfig']['percentageOfEquivalence']
         numberOfGroupsPerSource = int(numberOfEquivalentQueryGroups / numOfDistinctSourcesToUse)
