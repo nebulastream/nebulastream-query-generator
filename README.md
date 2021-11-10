@@ -1,4 +1,6 @@
-# About
+# Query Generator
+
+## About
 This project represents the Query Generator that generates large volumes of synthetic queries with different characteristics for NebulaStream.
 We first describe the process of generating a synthetic query.
 After that, we describe the process of generating a syntactically equivalent query based on a synthetic query.
@@ -58,13 +60,13 @@ The Query Generator then generates the queries using the following five-Step pro
 4. The generator calculates the number of equivalent queries to generate within the group.
 5. The generator based on the value of percentage of equivalence among semantically equivalent queries generate remaining queries in the group
 
-# Installation
+## Installation
 
 The [requirements.txt](requirements.txt) file should list all Python libraries that this project depend on, and they will be installed using
 
 `pip install -r requirements.txt`
 
-# How To Run
+## How To Run
 
 `./main --configPath=<Location of configuration file>`
 
@@ -112,7 +114,7 @@ sourceList: (Object[]) List of different source schemas to be used while generat
     timestamp_fields: (String[]) Names of timestamp fields in the schema
 ```
 
-#### Example Configuration:
+### Example Configuration:
 
 ```
 noQueries: 18000
