@@ -17,15 +17,11 @@ from operator_generator_strategies.equivalent_operator_strategies.project_equiva
     ProjectEquivalentProjectGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.union_equivalent_strategy import \
     UnionEquivalentUnionGeneratorStrategy
-from operators.map_operator import MapOperator
-from operators.union_operator import UnionOperator
 from query_generator.query import Query
 from operator_generator_strategies.distinct_operator_strategies.distinct_sink_strategy import \
     DistinctSinkGeneratorStrategy
 from operator_generator_strategies.distinct_operator_strategies.distinct_source_strategy import \
     DistinctSourceGeneratorStrategy
-from operator_generator_strategies.distinct_operator_strategies.distinct_map_strategy1 import \
-    DistinctMapGeneratorStrategy1
 from utils.contracts import Schema
 from utils.utils import *
 

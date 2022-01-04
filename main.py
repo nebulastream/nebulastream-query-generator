@@ -44,8 +44,6 @@ from operator_generator_strategies.distinct_operator_strategies.distinct_union_s
 from operator_generator_strategies.distinct_operator_strategies.distinct_join_strategy import \
     DistinctJoinGeneratorStrategy
 
-from utils.utils import random_list_element
-
 
 @click.command()
 @click.option('-cf', '--config-file', help='Location of the configuration file.', type=click.STRING)
@@ -87,7 +85,6 @@ def run(config_file):
                 baseSource = distinctSourcesToUse[0]
                 distinctSourcesToUse.remove(baseSource)
                 for j in range(numberOfEquivalentQueryGroups):
-                    # NOTE: this won't work when we need a binary operator in the query
                     randomQueries = int((numberOfQueriesPerGroup * percentageOfRandomQueries) / 100)
                     equivalentQueries.extend(getEquivalentQueries(numberOfQueriesPerGroup - randomQueries,
                                                                   percentageOfEquivalence,
@@ -130,7 +127,6 @@ def run(config_file):
             distinctSourcesToUse.sort(key=lambda x: x.name, reverse=False)
             baseSource = distinctSourcesToUse[0]
             distinctSourcesToUse.remove(baseSource)
-            # NOTE: this won't work when we need a binary operator in the query
             equivalentQueries.extend(getEquivalentQueriesForHybrid(numberOfGroupsPerSource, numberOfQueriesPerGroup,
                                                                    percentageOfEquivalence,
                                                                    baseSource, distinctSourcesToUse))
@@ -169,8 +165,6 @@ def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: 
     filter_operator_reorder_strategy = FilterOperatorReorderGeneratorStrategy()
     map_expression_reorder_strategy = MapExpressionReorderGeneratorStrategy()
     map_operator_reorder_strategy = MapOperatorReorderGeneratorStrategy()
-    map_create_new_field_strategy = MapCreateNewFieldGeneratorStrategy()
-    map_substitute_map_expression_strategy = MapSubstituteMapExpressionGeneratorStrategy()
     filter_substitute_map_expression_strategy = FilterSubstituteMapExpressionGeneratorStrategy()
     filter_equivalent_filter_strategy = FilterEquivalentFilterGeneratorStrategy()
     project_equivalent_project_strategy = ProjectEquivalentProjectGeneratorStrategy()
@@ -183,8 +177,6 @@ def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: 
     equivalentOperatorGeneratorStrategies = [
         map_expression_reorder_strategy,
         map_operator_reorder_strategy,
-        # map_create_new_field_strategy,
-        # map_substitute_map_expression_strategy,
         filter_substitute_map_expression_strategy,
         filter_expression_reorder_strategy,
         filter_operator_reorder_strategy,
