@@ -75,7 +75,7 @@ class AggregationEquivalentAggregationGeneratorStrategy(BaseGeneratorStrategy):
         _, aggregationOperation = random_list_element(
             [Aggregations.avg, Aggregations.min, Aggregations.max, Aggregations.sum])
         self._aggregationOperation = aggregationOperation
-        self._intervalInMin = random_int_between(1, 100)
+        self._intervalInMin = random_int_between(1, 4)
         self._timestampField = random_field_name(schema.get_timestamp_fields())
         self._schema = schema
 

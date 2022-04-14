@@ -110,7 +110,7 @@ class JoinEquivalentJoinGeneratorStrategy(BaseGeneratorStrategy):
         # if bool(random.getrandbits(1)):
         #     self._joinKey = random_field_name(numerical_fields)
 
-        self._intervalInMin = random_int_between(1, 100)
+        self._intervalInMin = random_int_between(1, 4)
         self._timestampField = random_field_name(schema.get_timestamp_fields())
         self._leftSchema = schema
 
