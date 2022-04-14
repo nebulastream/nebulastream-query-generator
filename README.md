@@ -1,7 +1,8 @@
 # Query Generator
 
 ## About
-This project represents the Query Generator that generates large volumes of synthetic queries with different characteristics for NebulaStream.
+This project represents the Query Generator that generates large volumes of synthetic queries with different 
+characteristics for System X.
 We first describe the process of generating a synthetic query.
 After that, we describe the process of generating a syntactically equivalent query based on a synthetic query.
 In the end, we describe the process of generating a partially equivalent query based on a synthetic query.
