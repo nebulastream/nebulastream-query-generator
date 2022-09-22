@@ -1,55 +1,140 @@
-noQueries: 1000
+noQueries: 102400
 # Value can be Normal or BiasedForHybrid
 workloadType: Normal
 generateEquivalentQueries: true
-sourcesToUse: 4
+sourcesToUse: 256
 equivalenceConfig:
   percentageOfRandomQueries: 0
   noOfEquivalentQueryGroups: 10
   percentageOfEquivalence: 100
 sourceList:
-  - streamName: 'A'
+  - streamName: 'example1'
     intFields: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
     stringFields: [ ]
     doubleFields: [ ]
     timestampFields: [ 'time1', 'time2' ]
-  - streamName: 'B'
+  - streamName: 'example2'
     intFields: [ 'g', 'h', 'i', 'j', 'k', 'l' ]
     stringFields: [ ]
     doubleFields: [ ]
     timestampFields: [ 'time1', 'time2' ]
-  - streamName: 'C'
+  - streamName: 'example3'
     intFields: [ 'm', 'n', 'o', 'p', 'q', 'r' ]
     stringFields: [ ]
     doubleFields: [ ]
     timestampFields: [ 'time1', 'time2' ]
-  - streamName: 'D'
+  - streamName: 'example4'
     intFields: [ 's', 't', 'u', 'v', 'w', 'x' ]
     stringFields: [ ]
     doubleFields: [ ]
     timestampFields: [ 'time1', 'time2' ]
-#  - streamName: 'E'
-#    intFields: [ 'g', 'h', 'i', 'j', 'k', 'l' ]
-#    stringFields: [ ]
-#    doubleFields: [ ]
-#    timestampFields: [ 'time1', 'time2' ]
-#  - streamName: 'F'
-#    intFields: [ 'm', 'n', 'o', 'p', 'q', 'r' ]
-#    stringFields: [ ]
-#    doubleFields: [ ]
-#    timestampFields: [ 'time1', 'time2' ]
-#  - streamName: 'G'
-#    intFields: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
-#    stringFields: [ ]
-#    doubleFields: [ ]
-#    timestampFields: [ 'time1', 'time2' ]
-#  - streamName: 'H'
-#    intFields: [ 'g', 'h', 'i', 'j', 'k', 'l' ]
-#    stringFields: [ ]
-#    doubleFields: [ ]
-#    timestampFields: [ 'time1', 'time2' ]
-#  - streamName: 'I'
-#    intFields: [ 'm', 'n', 'o', 'p', 'q', 'r' ]
-#    stringFields: [ ]
-#    doubleFields: [ ]
-#    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example5'
+    intFields: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example6'
+    intFields: [ 'g', 'h', 'i', 'j', 'k', 'l' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example7'
+    intFields: [ 'm', 'n', 'o', 'p', 'q', 'r' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example8'
+    intFields: [ 's', 't', 'u', 'v', 'w', 'x' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example9'
+    intFields: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example10'
+    intFields: [ 'g', 'h', 'i', 'j', 'k', 'l' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example11'
+    intFields: [ 'm', 'n', 'o', 'p', 'q', 'r' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example12'
+    intFields: [ 's', 't', 'u', 'v', 'w', 'x' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example13'
+    intFields: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example14'
+    intFields: [ 'g', 'h', 'i', 'j', 'k', 'l' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example15'
+    intFields: [ 'm', 'n', 'o', 'p', 'q', 'r' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example16'
+    intFields: [ 's', 't', 'u', 'v', 'w', 'x' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example17'
+    intFields: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example18'
+    intFields: [ 'g', 'h', 'i', 'j', 'k', 'l' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example19'
+    intFields: [ 'm', 'n', 'o', 'p', 'q', 'r' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example20'
+    intFields: [ 's', 't', 'u', 'v', 'w', 'x' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example21'
+    intFields: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example22'
+    intFields: [ 'g', 'h', 'i', 'j', 'k', 'l' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example23'
+    intFields: [ 'm', 'n', 'o', 'p', 'q', 'r' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example24'
+    intFields: [ 's', 't', 'u', 'v', 'w', 'x' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example25'
+    intFields: [ 'a', 'b', 'c', 'd', 'e', 'f' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]
+  - streamName: 'example26'
+    intFields: [ 'g', 'h', 'i', 'j', 'k', 'l' ]
+    stringFields: [ ]
+    doubleFields: [ ]
+    timestampFields: [ 'time1', 'time2' ]

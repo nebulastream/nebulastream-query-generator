@@ -1,6 +1,5 @@
 import random
 from typing import List
-
 import click
 import yaml
 
@@ -68,6 +67,7 @@ def run(config_file):
 
     equivalentQueries: List[Query] = []
     distinctQueries: List[Query] = []
+    distinctSourcesUsed: List[Query] = []
 
     if workloadType == "Normal":
 
@@ -79,29 +79,45 @@ def run(config_file):
             numberOfQueriesPerGroup = int(numberOfQueriesPerSource / numberOfEquivalentQueryGroups)
             # Iterate over sources
             for i in range(numOfDistinctSourcesToUse):
-                numOfSourceToUse = random.randint(1, 2)
-                distinctSourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
-                distinctSourcesToUse.sort(key=lambda x: x.name, reverse=False)
-                baseSource = distinctSourcesToUse[0]
-                distinctSourcesToUse.remove(baseSource)
+                sourcesToUse = []
+                # Loop till we find a distinct set of sources to generate queries
+                while len(sourcesToUse) == 0:
+                    numOfSourceToUse = random.randint(1, 2)
+                    sourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
+                    sourcesToUse.sort(key=lambda x: x.name, reverse=False)
+                    if str(sourcesToUse) not in distinctSourcesUsed:
+                        distinctSourcesUsed.append(str(sourcesToUse))
+                    else:
+                        sourcesToUse = []
+
+                baseSource = sourcesToUse[0]
+                sourcesToUse.remove(baseSource)
                 for j in range(numberOfEquivalentQueryGroups):
                     randomQueries = int((numberOfQueriesPerGroup * percentageOfRandomQueries) / 100)
                     equivalentQueries.extend(getEquivalentQueries(numberOfQueriesPerGroup - randomQueries,
                                                                   percentageOfEquivalence,
-                                                                  baseSource, distinctSourcesToUse))
-                    distinctQueries.extend(getDistinctQueries(randomQueries, baseSource, distinctSourcesToUse))
+                                                                  baseSource, sourcesToUse))
+                    distinctQueries.extend(getDistinctQueries(randomQueries, baseSource, sourcesToUse))
 
             # Populate remaining queries
             remainingQueries = numberOfQueries - (numberOfQueriesPerGroup * numOfDistinctSourcesToUse * numberOfEquivalentQueryGroups)
             if remainingQueries > 0:
-                numOfSourceToUse = random.randint(1, 2)
-                distinctSourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
-                distinctSourcesToUse.sort(key=lambda x: x.name, reverse=False)
-                baseSource = distinctSourcesToUse[0]
-                distinctSourcesToUse.remove(baseSource)
+                sourcesToUse = []
+                # Loop till we find a distinct set of sources to generate queries
+                while len(sourcesToUse) == 0:
+                    numOfSourceToUse = random.randint(1, 2)
+                    sourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
+                    sourcesToUse.sort(key=lambda x: x.name, reverse=False)
+                    if str(sourcesToUse) not in distinctSourcesUsed:
+                        distinctSourcesUsed.append(str(sourcesToUse))
+                    else:
+                        sourcesToUse = []
+
+                baseSource = sourcesToUse[0]
+                sourcesToUse.remove(baseSource)
                 for i in range(int(remainingQueries / numberOfQueriesPerGroup)):
                     equivalentQueries.extend(getEquivalentQueries(numberOfQueriesPerGroup, percentageOfEquivalence,
-                                                                  baseSource, distinctSourcesToUse))
+                                                                  baseSource, sourcesToUse))
 
         else:
             numberOfDistinctQueriesPerSource = numberOfQueries / numOfDistinctSourcesToUse
@@ -109,12 +125,21 @@ def run(config_file):
                 numOfSourceToUse = 1
                 if numOfDistinctSourcesToUse > 1:
                     numOfSourceToUse = 2
-                distinctSourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
-                distinctSourcesToUse.sort(key=lambda x: x.name, reverse=False)
-                baseSource = distinctSourcesToUse[0]
-                distinctSourcesToUse.remove(baseSource)
+
+                sourcesToUse = []
+                # Loop till we find a distinct set of sources to generate queries
+                while len(sourcesToUse) == 0:
+                    sourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
+                    sourcesToUse.sort(key=lambda x: x.name, reverse=False)
+                    if str(sourcesToUse) not in distinctSourcesUsed:
+                        distinctSourcesUsed.append(str(sourcesToUse))
+                    else:
+                        sourcesToUse = []
+
+                baseSource = sourcesToUse[0]
+                sourcesToUse.remove(baseSource)
                 distinctQueries.extend(
-                    getDistinctQueries(numberOfDistinctQueriesPerSource, baseSource, distinctSourcesToUse))
+                    getDistinctQueries(numberOfDistinctQueriesPerSource, baseSource, sourcesToUse))
     elif workloadType == "BiasedForHybrid":
         numberOfEquivalentQueryGroups = configuration['equivalenceConfig']['noOfEquivalentQueryGroups']
         percentageOfEquivalence = configuration['equivalenceConfig']['percentageOfEquivalence']
@@ -122,21 +147,26 @@ def run(config_file):
         numberOfQueriesPerGroup = int(numberOfQueries / numberOfEquivalentQueryGroups)
         # Iterate over sources
         for i in range(numOfDistinctSourcesToUse):
-            numOfSourceToUse = random.randint(1, 2)
-            distinctSourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
-            distinctSourcesToUse.sort(key=lambda x: x.name, reverse=False)
-            baseSource = distinctSourcesToUse[0]
-            distinctSourcesToUse.remove(baseSource)
+            sourcesToUse = []
+            # Loop till we find a distinct set of sources to generate queries
+            while len(sourcesToUse) == 0:
+                numOfSourceToUse = random.randint(1, 2)
+                sourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
+                sourcesToUse.sort(key=lambda x: x.name, reverse=False)
+                if str(sourcesToUse) not in distinctSourcesUsed:
+                    distinctSourcesUsed.append(str(sourcesToUse))
+                else:
+                    sourcesToUse = []
+            baseSource = sourcesToUse[0]
+            sourcesToUse.remove(baseSource)
             equivalentQueries.extend(getEquivalentQueriesForHybrid(numberOfGroupsPerSource, numberOfQueriesPerGroup,
                                                                    percentageOfEquivalence,
-                                                                   baseSource, distinctSourcesToUse))
+                                                                   baseSource, sourcesToUse))
 
     queries: List[Query] = []
     queries.extend(equivalentQueries)
     queries.extend(distinctQueries)
-
     random.shuffle(queries)
-
     # Write queries into file
     with open("generated_queries.txt", "w+") as f:
         for query in queries:
