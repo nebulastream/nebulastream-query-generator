@@ -1,2 +1,3 @@
-click~=7.1.2
-PyYAML~=5.4.1
+version https://git-lfs.github.com/spec/v1
+oid sha256:2074f8b42da47a4be1b17b74a74c5b5b395f45380eb553b7374e6fe17e78320c
+size 26
