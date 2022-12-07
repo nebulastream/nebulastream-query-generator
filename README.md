@@ -68,7 +68,7 @@ The [requirements.txt](requirements.txt) file should list all Python libraries t
 
 ## How To Run
 
-`./main --configPath=<Location of configuration file>`
+`python3 main.py -cf=<Location of configuration file>`
 
 ## Configurations
 
