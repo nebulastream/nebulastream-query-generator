@@ -19,6 +19,12 @@ class FilterOperatorReorderGeneratorStrategy(BaseGeneratorStrategy):
         self._schema = None
 
     def generate(self, schema: Schema) -> List[Operator]:
+        """
+        creates two filter operations for an equivalent query group
+        adds the operations to each query in a random order
+        :param schema:
+        :return:
+        """
         if not self._filter1Field:
             self.__prepareEquivalentFilterExpressions(schema)
 
@@ -38,6 +44,13 @@ class FilterOperatorReorderGeneratorStrategy(BaseGeneratorStrategy):
         return shuffle_list([filter1, filter2])
 
     def __prepareEquivalentFilterExpressions(self, schema: Schema):
+        """
+        Obtain two random mutual exclusive numerical fields from schema
+        obtain two random logical operators <, <=, >, >=, ==
+        obtain two random constants
+        :param schema:
+        :return:
+        """
         schemaCopy = deepcopy(schema)
         numFields = schemaCopy.get_numerical_fields()
         self._filter1Field = random_field_name(numFields)

@@ -23,7 +23,7 @@ class DistinctAggregationGeneratorStrategy(BaseGeneratorStrategy):
             fields.remove(window._windowKey)
         _, field = random_list_element(fields)
         _, aggregationOperation = random_list_element(
-            [Aggregations.avg, Aggregations.min, Aggregations.max, Aggregations.sum])
+            [Aggregations.avg, Aggregations.min, Aggregations.max, Aggregations.sum, Aggregations.median, Aggregations.count])
 
         outputField = field
         alias = ""
@@ -35,5 +35,5 @@ class DistinctAggregationGeneratorStrategy(BaseGeneratorStrategy):
         schema = Schema(name=schema.name, int_fields=[outputField], double_fields=[], string_fields=[],
                         timestamp_fields=window.get_output_schema().timestamp_fields,
                         fieldNameMapping=schema.get_field_name_mapping())
-        aggregationOperator = AggregationOperator(aggregation=aggregation, alias=alias, window=window, schema=schema)
+        aggregationOperator = AggregationOperator(aggregations=[aggregation], alias=alias, window=window, schema=schema)
         return [aggregationOperator]
