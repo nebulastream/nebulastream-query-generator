@@ -61,7 +61,7 @@ class AggregationEquivalentAggregationGeneratorStrategy(BaseGeneratorStrategy):
         schema = Schema(name=schema.name, int_fields=[outputField], double_fields=[], string_fields=[],
                         timestamp_fields=window.get_output_schema().timestamp_fields,
                         fieldNameMapping={outputField: self._field})
-        aggregationOperator = AggregationOperator(aggregation=aggregation, alias=alias, window=window, schema=schema)
+        aggregationOperator = AggregationOperator(aggregations=[aggregation], alias=alias, window=window, schema=schema)
         return [aggregationOperator]
 
     def __initializeEquivalentFilters(self, schema: Schema):

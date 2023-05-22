@@ -3,16 +3,12 @@ from typing import List
 import click
 import yaml
 
-from operator_generator_strategies.equivalent_operator_strategies.filter_equivalent_filter_strategy import \
-    FilterEquivalentFilterGeneratorStrategy
+from operator_generator_strategies.containment_operator_strategies.filter_containment_strategy import \
+    FilterContainmentFilterGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.filter_substitute_map_expression_startegy import \
     FilterSubstituteMapExpressionGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.join_equivalent_strategy import \
     JoinEquivalentJoinGeneratorStrategy
-from operator_generator_strategies.equivalent_operator_strategies.map_create_new_field_strategy import \
-    MapCreateNewFieldGeneratorStrategy
-from operator_generator_strategies.equivalent_operator_strategies.map_substitute_map_expression_strategy import \
-    MapSubstituteMapExpressionGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.filter_expression_reorder_strategy import \
     FilterExpressionReorderGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.filter_operator_reorder_strategy import \
@@ -66,12 +62,13 @@ def run(config_file):
     workloadType = configuration['workloadType']
 
     equivalentQueries: List[Query] = []
+    containmentQueries: List[Query] = []
     distinctQueries: List[Query] = []
     distinctSourcesUsed: List[Query] = []
 
     if workloadType == "Normal":
 
-        if generateEquivalentQueries:
+        if generateEquivalentQueries == "equivalence":
             percentageOfRandomQueries = configuration['equivalenceConfig']['percentageOfRandomQueries']
             numberOfEquivalentQueryGroups = configuration['equivalenceConfig']['noOfEquivalentQueryGroups']
             percentageOfEquivalence = configuration['equivalenceConfig']['percentageOfEquivalence']
@@ -119,7 +116,7 @@ def run(config_file):
                     equivalentQueries.extend(getEquivalentQueries(numberOfQueriesPerGroup, percentageOfEquivalence,
                                                                   baseSource, sourcesToUse))
 
-        else:
+        elif generateEquivalentQueries == "distinct":
             numberOfDistinctQueriesPerSource = numberOfQueries / numOfDistinctSourcesToUse
             for i in range(numOfDistinctSourcesToUse):
                 numOfSourceToUse = 1
@@ -140,6 +137,73 @@ def run(config_file):
                 sourcesToUse.remove(baseSource)
                 distinctQueries.extend(
                     getDistinctQueries(numberOfDistinctQueriesPerSource, baseSource, sourcesToUse))
+        elif generateEquivalentQueries == "containment":
+            percentageOfRandomQueries = configuration['containmentConfig']['percentageOfRandomQueries']
+            numberOfEquivalentQueryGroups = configuration['containmentConfig']['noOfContainmentQueryGroups']
+            percentageOfEquivalence = configuration['containmentConfig']['percentageOfEquivalence']
+            percentageOfContainment = configuration['containmentConfig']['percentageOfContainment']
+            numberOfQueriesPerSource = int(numberOfQueries / numOfDistinctSourcesToUse)
+            numberOfQueriesPerGroup = int(numberOfQueriesPerSource / numberOfEquivalentQueryGroups)
+            # Iterate over sources
+            for i in range(numOfDistinctSourcesToUse):
+                sourcesToUse = []
+                # Loop till we find a distinct set of sources to generate queries
+                while len(sourcesToUse) == 0:
+                    numOfSourceToUse = random.randint(1, 2)
+                    sourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
+                    sourcesToUse.sort(key=lambda x: x.name, reverse=False)
+                    if str(sourcesToUse) not in distinctSourcesUsed:
+                        distinctSourcesUsed.append(str(sourcesToUse))
+                    else:
+                        sourcesToUse = []
+
+                baseSource = sourcesToUse[0]
+                sourcesToUse.remove(baseSource)
+                for j in range(numberOfEquivalentQueryGroups):
+                    randomQueries = int((numberOfQueriesPerGroup * percentageOfRandomQueries) / 100)
+                    equivalentQueries.extend(getEquivalentQueries(numberOfQueriesPerGroup - randomQueries,
+                                                                  percentageOfEquivalence,
+                                                                  baseSource, sourcesToUse))
+                    distinctQueries.extend(getDistinctQueries(randomQueries, baseSource, sourcesToUse))
+
+            # Populate remaining queries
+            remainingQueries = numberOfQueries - (
+                        numberOfQueriesPerGroup * numOfDistinctSourcesToUse * numberOfEquivalentQueryGroups)
+            if remainingQueries > 0:
+                sourcesToUse = []
+                # Loop till we find a distinct set of sources to generate queries
+                while len(sourcesToUse) == 0:
+                    numOfSourceToUse = random.randint(1, 2)
+                    sourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
+                    sourcesToUse.sort(key=lambda x: x.name, reverse=False)
+                    if str(sourcesToUse) not in distinctSourcesUsed:
+                        distinctSourcesUsed.append(str(sourcesToUse))
+                    else:
+                        sourcesToUse = []
+
+                baseSource = sourcesToUse[0]
+                sourcesToUse.remove(baseSource)
+                for i in range(int(remainingQueries / numberOfQueriesPerGroup)):
+                    equivalentQueries.extend(getEquivalentQueries(numberOfQueriesPerGroup, percentageOfEquivalence,
+                                                                  baseSource, sourcesToUse))
+            if remainingQueries > 0:
+                sourcesToUse = []
+                # Loop till we find a distinct set of sources to generate queries
+                while len(sourcesToUse) == 0:
+                    numOfSourceToUse = random.randint(1, 2)
+                    sourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
+                    sourcesToUse.sort(key=lambda x: x.name, reverse=False)
+                    if str(sourcesToUse) not in distinctSourcesUsed:
+                        distinctSourcesUsed.append(str(sourcesToUse))
+                    else:
+                        sourcesToUse = []
+
+                baseSource = sourcesToUse[0]
+                sourcesToUse.remove(baseSource)
+                for i in range(int(remainingQueries / numberOfQueriesPerGroup)):
+                    containmentQueries.extend(getContainmentQueries(numberOfQueriesPerGroup, percentageOfContainment,
+                                                                  baseSource, sourcesToUse))
+
     elif workloadType == "BiasedForHybrid":
         numberOfEquivalentQueryGroups = configuration['equivalenceConfig']['noOfEquivalentQueryGroups']
         percentageOfEquivalence = configuration['equivalenceConfig']['percentageOfEquivalence']
@@ -196,7 +260,6 @@ def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: 
     map_expression_reorder_strategy = MapExpressionReorderGeneratorStrategy()
     map_operator_reorder_strategy = MapOperatorReorderGeneratorStrategy()
     filter_substitute_map_expression_strategy = FilterSubstituteMapExpressionGeneratorStrategy()
-    filter_equivalent_filter_strategy = FilterEquivalentFilterGeneratorStrategy()
     project_equivalent_project_strategy = ProjectEquivalentProjectGeneratorStrategy()
     aggregate_equivalent_aggregate_strategy = AggregationEquivalentAggregationGeneratorStrategy()
 
@@ -210,7 +273,59 @@ def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: 
         filter_substitute_map_expression_strategy,
         filter_expression_reorder_strategy,
         filter_operator_reorder_strategy,
-        filter_equivalent_filter_strategy,
+        project_equivalent_project_strategy
+    ]
+
+    filterGenerator = DistinctFilterGeneratorStrategy(max_number_of_predicates=2)
+    mapGenerator = DistinctMapGeneratorStrategy1()
+    aggregateGenerator = DistinctAggregationGeneratorStrategy()
+    projectGenerator = DistinctProjectionGeneratorStrategy()
+    distinctOperatorGeneratorStrategies = [filterGenerator, mapGenerator, aggregateGenerator, projectGenerator,
+                                           mapGenerator]
+
+    distinctOperators = 5 - int((5 * percentageOfEquivalence) / 100)
+    distinctOperatorGenerators = random.sample(distinctOperatorGeneratorStrategies, distinctOperators)
+    equivalentOperatorGenerators = random.sample(equivalentOperatorGeneratorStrategies, 5 - distinctOperators)
+
+    if len(possibleSources) >= 1:
+        unionPresent = False
+        if random.randint(1, 2) % 2 == 0:
+            equivalentOperatorGenerators.append(union_equivalent_strategies)
+            unionPresent = True
+
+        if not unionPresent:
+            equivalentOperatorGenerators.append(join_equivalent_strategies)
+
+    if random.randint(1, 5) % 5 == 0:
+        equivalentOperatorGenerators.append(aggregate_equivalent_aggregate_strategy)
+
+    return QueryGenerator(baseSource, possibleSources, numberOfQueriesPerGroup, equivalentOperatorGenerators,
+                          distinctOperatorGenerators).generate()
+
+def getContainmentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: int, baseSource: Schema,
+                         possibleSources: List[Schema]) -> List[Query]:
+    # Initialize instances of each generator strategy
+    filter_expression_reorder_strategy = FilterExpressionReorderGeneratorStrategy()
+    filter_operator_reorder_strategy = FilterOperatorReorderGeneratorStrategy()
+    map_expression_reorder_strategy = MapExpressionReorderGeneratorStrategy()
+    map_operator_reorder_strategy = MapOperatorReorderGeneratorStrategy()
+    filter_substitute_map_expression_strategy = FilterSubstituteMapExpressionGeneratorStrategy()
+    project_equivalent_project_strategy = ProjectEquivalentProjectGeneratorStrategy()
+    aggregate_equivalent_aggregate_strategy = AggregationEquivalentAggregationGeneratorStrategy()
+    filter_containment_filter_strategy = FilterContainmentFilterGeneratorStrategy()
+
+
+    # Remove the base source from possible sources for binary operator and initialize generator strategies
+    union_equivalent_strategies = UnionEquivalentUnionGeneratorStrategy(possibleSources)
+    join_equivalent_strategies = JoinEquivalentJoinGeneratorStrategy(possibleSources)
+
+    equivalentOperatorGeneratorStrategies = [
+        map_expression_reorder_strategy,
+        map_operator_reorder_strategy,
+        filter_substitute_map_expression_strategy,
+        filter_expression_reorder_strategy,
+        filter_operator_reorder_strategy,
+        filter_containment_filter_strategy,
         project_equivalent_project_strategy
     ]
 
@@ -240,7 +355,6 @@ def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: 
     return QueryGenerator(baseSource, possibleSources, numberOfQueriesPerGroup, equivalentOperatorGenerators,
                           distinctOperatorGenerators).generate()
 
-
 def getEquivalentQueriesForHybrid(numberOfGroupsPerSource: int, numberOfQueriesPerGroup: int,
                                   percentageOfEquivalence: int,
                                   baseSource: Schema,
@@ -251,7 +365,7 @@ def getEquivalentQueriesForHybrid(numberOfGroupsPerSource: int, numberOfQueriesP
     map_expression_reorder_strategy = MapExpressionReorderGeneratorStrategy()
     map_operator_reorder_strategy = MapOperatorReorderGeneratorStrategy()
     filter_substitute_map_expression_strategy = FilterSubstituteMapExpressionGeneratorStrategy()
-    filter_equivalent_filter_strategy = FilterEquivalentFilterGeneratorStrategy()
+    filter_equivalent_filter_strategy = FilterContainmentFilterGeneratorStrategy()
     project_equivalent_project_strategy = ProjectEquivalentProjectGeneratorStrategy()
     aggregate_equivalent_aggregate_strategy = AggregationEquivalentAggregationGeneratorStrategy()
 

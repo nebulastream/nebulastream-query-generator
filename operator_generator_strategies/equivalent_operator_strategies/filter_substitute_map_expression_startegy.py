@@ -51,8 +51,8 @@ class FilterSubstituteMapExpressionGeneratorStrategy(BaseGeneratorStrategy):
             LogicalExpression(FieldAccessExpression(self._mapAssignmentFieldName), arithExpression2, self._logicalOp),
             schema)
 
-        _, followUpMap = random_list_element([followUpFilter1, followUpFilter2])
-        return [baseMap, followUpMap]
+        _, followUpFilter = random_list_element([followUpFilter1, followUpFilter2])
+        return [baseMap, followUpFilter]
 
     def __initializeFiltersWithSubstitutedMapExpression(self, schema: Schema):
         schemaCopy = deepcopy(schema)

@@ -12,11 +12,16 @@ class FilterExpressionReorderGeneratorStrategy(BaseGeneratorStrategy):
         self._filterLHSFieldName = None
         self._filterRHSFieldName = None
         self._filter1logicalOp = None
-        self._filter1logicalOp = None
         self._filter2logicalOp = None
         self._schema = None
 
     def generate(self, schema: Schema) -> List[Operator]:
+        """
+        This method is responsible for changing the order of two filter operators
+        e.g. .filter(x > y) vs. .filter(y < x)
+        :param schema:
+        :return:
+        """
         if not self._filterLHSFieldName:
             self.__prepareEquivalentFilterExpressions(schema)
 
@@ -37,6 +42,11 @@ class FilterExpressionReorderGeneratorStrategy(BaseGeneratorStrategy):
         return [filterOp]
 
     def __prepareEquivalentFilterExpressions(self, schema: Schema):
+        """
+        Obtain two random numerical fields from schema
+        obtain a random logical operator
+        :param schema: source schema
+        """
         schemaCopy = deepcopy(schema)
         numFields = schemaCopy.get_numerical_fields()
         self._filterLHSFieldName = random_field_name(numFields)
@@ -59,6 +69,11 @@ class FilterExpressionReorderGeneratorStrategy(BaseGeneratorStrategy):
         self._schema = schema
 
     def validation(self, schema: Schema) -> bool:
+        """
+        Check if the schema has the required fields
+        :param schema:
+        :return:
+        """
         if self._filterLHSFieldName not in schema.get_numerical_fields():
             return False
         return True
