@@ -323,8 +323,8 @@ def getContainmentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence:
         project_equivalent_project_strategy
     ]
     containmentOperatorGeneratorStrategies = [
-        window_aggregation_containment_strategy,
-        projection_containment_strategy,
+        #window_aggregation_containment_strategy,
+        #projection_containment_strategy,
         filter_containment_strategy
     ]
 
