@@ -10,7 +10,7 @@ from utils.utils import *
 
 class FilterContainmentGeneratorStrategy(BaseGeneratorStrategy):
     def __init__(self):
-
+        super().__init__()
         self._filter1LhsField = None
         self._filter1RhsField = None
         self._filter1LogicalOp = None
@@ -19,7 +19,7 @@ class FilterContainmentGeneratorStrategy(BaseGeneratorStrategy):
         self._containedFilterOperationCategory = None
         self._schema = None
 
-    def generate(self, schema: Schema) -> list[list[FilterOperator] | list[MapOperator | FilterOperator]]:
+    def generate(self, schema: Schema) -> List[Operator]:
         """
         Queries with similar filters (here y is an Integer value):
         Examples:
@@ -80,32 +80,32 @@ class FilterContainmentGeneratorStrategy(BaseGeneratorStrategy):
                 filterOp = self._filter1LogicalOp
                 if expressionOrder:
                     if self._filter1LogicalOp == LogicalOperators.lt:
-                        filterOp = random_list_element([LogicalOperators.lt, LogicalOperators.neq])
+                        _, filterOp = random_list_element([LogicalOperators.lt, LogicalOperators.neq])
                     elif self._filter1LogicalOp == LogicalOperators.gt:
-                        filterOp = random_list_element([LogicalOperators.gt, LogicalOperators.neq])
+                        _, filterOp = random_list_element([LogicalOperators.gt, LogicalOperators.neq])
                     elif self._filter1LogicalOp == LogicalOperators.lte:
-                        filterOp = random_list_element([LogicalOperators.lte, LogicalOperators.eq, LogicalOperators.lt])
+                        _, filterOp = random_list_element([LogicalOperators.lte, LogicalOperators.eq, LogicalOperators.lt])
                     elif self._filter1LogicalOp == LogicalOperators.gte:
-                        filterOp = random_list_element([LogicalOperators.gte, LogicalOperators.eq, LogicalOperators.gt])
+                        _, filterOp = random_list_element([LogicalOperators.gte, LogicalOperators.eq, LogicalOperators.gt])
                     elif self._filter1LogicalOp == LogicalOperators.eq:
-                        filterOp = random_list_element([LogicalOperators.eq, LogicalOperators.lte, LogicalOperators.gte])
+                        _, filterOp = random_list_element([LogicalOperators.eq, LogicalOperators.lte, LogicalOperators.gte])
                     elif self._filter1LogicalOp == LogicalOperators.neq:
-                        filterOp = random_list_element([LogicalOperators.neq, LogicalOperators.lt, LogicalOperators.gt])
+                        _, filterOp = random_list_element([LogicalOperators.neq, LogicalOperators.lt, LogicalOperators.gt])
                     filterOp1 = FilterOperator(LogicalExpression(fieldAccess, constExpression, filterOp),
                                                schema)
                 else:
                     if self._filter1LogicalOp == LogicalOperators.gt:
-                        filterOp = random_list_element([LogicalOperators.lt, LogicalOperators.neq])
+                        _, filterOp = random_list_element([LogicalOperators.lt, LogicalOperators.neq])
                     elif self._filter1LogicalOp == LogicalOperators.lt:
-                        filterOp = random_list_element([LogicalOperators.gt, LogicalOperators.neq])
+                        _, filterOp = random_list_element([LogicalOperators.gt, LogicalOperators.neq])
                     elif self._filter1LogicalOp == LogicalOperators.gte:
-                        filterOp = random_list_element([LogicalOperators.lte, LogicalOperators.eq, LogicalOperators.lt])
+                        _, filterOp = random_list_element([LogicalOperators.lte, LogicalOperators.eq, LogicalOperators.lt])
                     elif self._filter1LogicalOp == LogicalOperators.lte:
-                        filterOp = random_list_element([LogicalOperators.gte, LogicalOperators.eq, LogicalOperators.gt])
+                        _, filterOp = random_list_element([LogicalOperators.gte, LogicalOperators.eq, LogicalOperators.gt])
                     elif self._filter1LogicalOp == LogicalOperators.eq:
-                        filterOp = random_list_element([LogicalOperators.eq, LogicalOperators.lte, LogicalOperators.gte])
+                        _, filterOp = random_list_element([LogicalOperators.eq, LogicalOperators.lte, LogicalOperators.gte])
                     elif self._filter1LogicalOp == LogicalOperators.neq:
-                        filterOp = random_list_element([LogicalOperators.neq, LogicalOperators.lt, LogicalOperators.gt])
+                        _, filterOp = random_list_element([LogicalOperators.neq, LogicalOperators.lt, LogicalOperators.gt])
 
                     filterOp1 = FilterOperator(LogicalExpression(constExpression, fieldAccess, filterOp),
                                                schema)
@@ -124,28 +124,28 @@ class FilterContainmentGeneratorStrategy(BaseGeneratorStrategy):
                 filterOp = self._filter1LogicalOp
                 if expressionOrder:
                     if self._filter1LogicalOp == LogicalOperators.lt or self._filter1LogicalOp == LogicalOperators.lte:
-                        filterOp = random_list_element([LogicalOperators.lt, LogicalOperators.lte])
+                        _, filterOp = random_list_element([LogicalOperators.lt, LogicalOperators.lte])
                     elif self._filter1LogicalOp == LogicalOperators.gt or self._filter1LogicalOp == LogicalOperators.gte:
-                        filterOp = random_list_element([LogicalOperators.gt, LogicalOperators.gte])
+                        _, filterOp = random_list_element([LogicalOperators.gt, LogicalOperators.gte])
                     elif self._filter1LogicalOp == LogicalOperators.neq or self._filter1LogicalOp == LogicalOperators.eq:
-                        self._filter1LogicalOp = random_list_element([LogicalOperators.lt, LogicalOperators.gt, LogicalOperators.lte, LogicalOperators.gte])
+                        _, self._filter1LogicalOp = random_list_element([LogicalOperators.lt, LogicalOperators.gt, LogicalOperators.lte, LogicalOperators.gte])
                         filterOp = self._filter1LogicalOp
                     filterOp1 = FilterOperator(LogicalExpression(fieldAccess, constExpression, filterOp),
                                                schema)
                 else:
                     if self._filter1LogicalOp == LogicalOperators.lt or self._filter1LogicalOp == LogicalOperators.lte:
-                        filterOp = random_list_element([LogicalOperators.gt, LogicalOperators.gte])
+                        _, filterOp = random_list_element([LogicalOperators.gt, LogicalOperators.gte])
                     elif self._filter1LogicalOp == LogicalOperators.gt or self._filter1LogicalOp == LogicalOperators.gte:
-                        filterOp = random_list_element([LogicalOperators.lt, LogicalOperators.lte])
+                        _, filterOp = random_list_element([LogicalOperators.lt, LogicalOperators.lte])
                     elif self._filter1LogicalOp == LogicalOperators.neq or self._filter1LogicalOp == LogicalOperators.eq:
-                        self._filter1LogicalOp = random_list_element([LogicalOperators.lt, LogicalOperators.gt, LogicalOperators.lte, LogicalOperators.gte])
+                        _, self._filter1LogicalOp = random_list_element([LogicalOperators.lt, LogicalOperators.gt, LogicalOperators.lte, LogicalOperators.gte])
                         filterOp = self._filter1LogicalOp
 
                     filterOp1 = FilterOperator(LogicalExpression(constExpression, fieldAccess, filterOp),
                                                schema)
                 containedFilterOperators.append([filterOp1])
-
-        return containedFilterOperators
+        _, containedFilter = random_list_element(containedFilterOperators)
+        return containedFilter
 
     def __initializeEquivalentFilters(self, schema: Schema):
         schemaCopy = deepcopy(schema)
@@ -154,12 +154,15 @@ class FilterContainmentGeneratorStrategy(BaseGeneratorStrategy):
         self._filter2LhsField = random_field_name(intFields)
         self._filter1LhsField = random_field_name(intFields)
         intFields.remove(self._filter1LhsField)
-        self._filter1RhsField = random_field_name(intFields)
+        if len(intFields) > 0:
+            self._filter1RhsField = random_field_name(intFields)
+            self._containedFilterOperationCategory = random_int_between(0, 3)
+        else:
+            self._containedFilterOperationCategory = random_int_between(1, 3)
         _, self._filter1ArithOp = random_list_element(list(ArithmeticOperators))
         _, self._filter1LogicalOp = random_list_element(
             [LogicalOperators.lt, LogicalOperators.gt, LogicalOperators.lte, LogicalOperators.gte, LogicalOperators.eq,
              LogicalOperators.neq])
-        self._containedFilterOperationCategory = random_int_between(0, 3)
         self._schema = schema
 
     def validation(self, schema: Schema) -> bool:

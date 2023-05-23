@@ -4,7 +4,7 @@ import random
 from operator_generator_strategies.base_generator_strategy import BaseGeneratorStrategy
 from operators.project_operator import ProjectOperator
 from utils.contracts import Schema, Operator
-from utils.utils import random_int_between, random_name
+from utils.utils import random_list_element, random_int_between
 
 
 def create_projection(schema):
@@ -12,19 +12,19 @@ def create_projection(schema):
     noOfFieldsToProject = 1
     if len(numericalFields) > 1:
         noOfFieldsToProject = random_int_between(2, len(numericalFields))
-    fields = random.sample(range(noOfFieldsToProject), numericalFields)
+    fields = random.sample(numericalFields, noOfFieldsToProject)
     newFiledNames = []
     schema = Schema(name=schema.name, int_fields=fields, double_fields=schema.double_fields,
                     string_fields=schema.string_fields,
                     timestamp_fields=schema.timestamp_fields, fieldNameMapping=schema.get_field_name_mapping())
-    baseProjection = ProjectOperator(fieldsToProject=fields, newFieldNames=newFiledNames, schema=schema)
-    return baseProjection
+    projection = ProjectOperator(fieldsToProject=fields, newFieldNames=newFiledNames, schema=schema)
+    return projection
 
 
 class ProjectionContainmentGeneratorStrategy(BaseGeneratorStrategy):
-    def __init__(self, max_number_of_predicates: int = 1):
+    def __init__(self):
         super().__init__()
-        self._max_number_of_predicates = max_number_of_predicates
+        self._base_containment = None
 
     def generate(self, schema: Schema) -> List[Operator]:
         """
@@ -35,9 +35,11 @@ class ProjectionContainmentGeneratorStrategy(BaseGeneratorStrategy):
         :param schema:
         :return:
         """
-        baseProjection = create_projection(schema)
+        if not self._base_containment:
+            self._base_containment = create_projection(schema)
         containmentCases = []
         for i in range(0,10):
-            containmentCases.append(create_projection(baseProjection.output_schema))
-
-        return [baseProjection, containmentCases]
+            case = create_projection(self._base_containment.output_schema)
+            containmentCases.append(case)
+        _, containmentCase = random_list_element(containmentCases)
+        return [containmentCase]

@@ -1,5 +1,11 @@
 from copy import deepcopy
 
+from operator_generator_strategies.containment_operator_strategies.filter_containment_strategy import \
+    FilterContainmentGeneratorStrategy
+from operator_generator_strategies.containment_operator_strategies.window_aggregation_containment_strategy import \
+    WindowAggregationContainmentGeneratorStrategy
+from operator_generator_strategies.containment_operator_strategies.projection_containment_strategy import \
+    ProjectionContainmentGeneratorStrategy
 from operator_generator_strategies.base_generator_strategy import BaseGeneratorStrategy
 from operator_generator_strategies.distinct_operator_strategies.distinct_aggregation_strategy import \
     DistinctAggregationGeneratorStrategy
@@ -60,6 +66,20 @@ class QueryGenerator:
                     operators = generatorRule.generate(newQuery.output_schema())
                     for operator in operators:
                         newQuery.add_operator(operator)
+            # Generate containment operators
+            if len(self._containmentOperatorGenerators) == 1:
+                if isinstance(self._containmentOperatorGenerators[0], WindowAggregationContainmentGeneratorStrategy) and not \
+                        self._containmentOperatorGenerators[0]._base_containment:
+                    self._containmentOperatorGenerators[0].generate(newQuery.output_schema())
+                    newQuery.add_operator(self._containmentOperatorGenerators[0]._base_containment)
+                elif isinstance(self._containmentOperatorGenerators[0], ProjectionContainmentGeneratorStrategy) and not \
+                        self._containmentOperatorGenerators[0]._base_containment:
+                    self._containmentOperatorGenerators[0].generate(newQuery.output_schema())
+                    newQuery.add_operator(self._containmentOperatorGenerators[0]._base_containment)
+                else:
+                    operators = self._containmentOperatorGenerators[0].generate(newQuery.output_schema())
+                    for operator in operators:
+                        newQuery.add_operator(operator)
 
             distinctOperatorGenerators = self.shuffle_generator_strategies(deepcopy(self._distinctOperatorGenerators))
             distinctOperatorGenerators = self.reorder_generator_strategies(distinctOperatorGenerators)
@@ -67,17 +87,6 @@ class QueryGenerator:
             for generatorRule in distinctOperatorGenerators:
                 if isinstance(generatorRule, DistinctUnionGeneratorStrategy) or \
                         isinstance(generatorRule, DistinctJoinGeneratorStrategy):
-                    operators = generatorRule.generate(newQuery)
-                    newQuery = Query().add_operator(operators[0])
-                else:
-                    operators = generatorRule.generate(newQuery.output_schema())
-                    for operator in operators:
-                        newQuery.add_operator(operator)
-            # Generate containment operators
-            #todo: add reordering for containment operators
-            for generatorRule in self._containmentOperatorGenerators:
-                if isinstance(generatorRule, UnionEquivalentUnionGeneratorStrategy) or \
-                        isinstance(generatorRule, JoinEquivalentJoinGeneratorStrategy):
                     operators = generatorRule.generate(newQuery)
                     newQuery = Query().add_operator(operators[0])
                 else:

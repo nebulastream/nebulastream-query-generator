@@ -2,7 +2,7 @@ noQueries: 10
 # Value can be Normal or BiasedForHybrid
 workloadType: Normal
 # Value can be equivalence, distinct, or containment
-generateEquivalentQueries: equivalence
+generateEquivalentQueries: containment
 sourcesToUse: 1
 equivalenceConfig:
   percentageOfRandomQueries: 0
@@ -10,11 +10,11 @@ equivalenceConfig:
   percentageOfEquivalence: 100
 containmentConfig:
   percentageOfRandomQueries: 0
+  percentageOfEquivalentQueries: 0
   noOfContainmentQueryGroups: 1
-  percentageOfEquivalence: 50
-  percentageOfContainment: 20
+  percentageOfEquivalence: 100
   allowMultiWindow: false
-  allowUnionJoinWindowCombie: false
+  allowUnionJoinWindowCombi: false
   allowMultiContainment: false
 sourceList:
   - streamName: 'example1'

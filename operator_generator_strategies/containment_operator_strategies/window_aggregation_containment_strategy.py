@@ -9,17 +9,18 @@ from utils.contracts import Schema, Operator, WindowType, TimeUnit, Aggregations
 from utils.utils import random_field_name, random_list_element, random_int_between
 
 
-class WindowAggregationContainmentStrategy(BaseGeneratorStrategy):
+class WindowAggregationContainmentGeneratorStrategy(BaseGeneratorStrategy):
     def __init__(self):
         super().__init__()
         self._baseWindowTimeLength = None
         self._baseWindowTimeSlide = None
         self._baseWindowTimeStamp = None
         self._baseWindowKey = None
-        self._baseAggregationOperations = None
-        self._fields = None
+        self._baseAggregationOperations: List[Aggregations] = []
+        self._fields: List[str] = []
+        self._base_containment = None
 
-    def generate(self, schema: Schema, generateKey: bool = True) -> List[Operator]:
+    def generate(self, schema: Schema, generateKey: bool = True) -> List[AggregationOperator]:
         """
         generate a containment cases for window aggregations
         Examples:
@@ -38,7 +39,7 @@ class WindowAggregationContainmentStrategy(BaseGeneratorStrategy):
         if not self.validation(schema):
             self.update_columns(schema)
         # create the base window aggregation
-        aggregationOperator = self.createWindowAggregation(schema, self._baseWindowTimeLength, self._baseWindowTimeSlide, self._baseAggregationOperations, self._fields)
+        self._base_containment = self.createWindowAggregation(schema, self._baseWindowTimeLength, self._baseWindowTimeSlide, self._baseAggregationOperations, self._fields)
 
         containmentCases = []
         # create 10 random containment cases based off of the base containment case
@@ -49,8 +50,9 @@ class WindowAggregationContainmentStrategy(BaseGeneratorStrategy):
             aggregationOperations = [self._baseAggregationOperations[j] for j in random_indices]
             aggregationFields = [self._fields[j] for j in random_indices]
             containmentCases.append(self.createWindowAggregation(schema, self._baseWindowTimeLength * time_factor, self._baseWindowTimeSlide, aggregationOperations, aggregationFields))
-
-        return [aggregationOperator, containmentCases]
+        containmentCases.append(self._base_containment)
+        _, containmentCase = random_list_element(containmentCases)
+        return [containmentCase]
 
     def createWindowAggregation(self, schema, currentWindowLength, currentWindowSlide, currentAggregationOperations, currentFields):
         """
@@ -101,12 +103,13 @@ class WindowAggregationContainmentStrategy(BaseGeneratorStrategy):
             noOfFieldsToAggregate = random_int_between(1, len(numericalFields))
         # obtain the fields to aggregate and the aggregation operations
         for i in range(noOfFieldsToAggregate):
-            self._fields.append(random_field_name(numericalFields))
+            fieldName = random_field_name(numericalFields)
+            self._fields.append(fieldName)
             _, aggregationOperation = random_list_element(
                 [Aggregations.count, Aggregations.min, Aggregations.max, Aggregations.sum])
             self._baseAggregationOperations.append(aggregationOperation)
         # obtain the timestamp field
-        self._timestampField = random_field_name(schemaCopy.get_timestamp_fields())
+        self._baseWindowTimeStamp = random_field_name(schemaCopy.get_timestamp_fields())
         self._baseWindowKey = ""
         if generateKey and bool(random.getrandbits(1)):
             self._baseWindowKey = random_field_name(intFields)
@@ -121,14 +124,15 @@ class WindowAggregationContainmentStrategy(BaseGeneratorStrategy):
         return True
 
     def update_columns(self, schema: Schema):
-        for key, value in schema.get_timestamp_fields():
+        for key, value in schema.get_field_name_mapping().items():
             if value == self._schema.get_field_name_mapping()[self._baseWindowTimeStamp]:
                 self._baseWindowTimeStamp = key
                 break
 
-        for key, value in schema.get_field_name_mapping().items():
-            if value == self._schema.get_field_name_mapping()[self._baseWindowKey]:
-                self._baseWindowKey = key
-                break
+        if self._baseWindowKey:
+            for key, value in schema.get_field_name_mapping().items():
+                if value == self._schema.get_field_name_mapping()[self._baseWindowKey]:
+                    self._baseWindowKey = key
+                    break
 
         self._schema = schema
