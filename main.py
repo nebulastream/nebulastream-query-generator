@@ -4,7 +4,11 @@ import click
 import yaml
 
 from operator_generator_strategies.containment_operator_strategies.filter_containment_strategy import \
-    FilterContainmentFilterGeneratorStrategy
+    FilterContainmentGeneratorStrategy
+from operator_generator_strategies.containment_operator_strategies.projection_containment_strategy import \
+    ProjectionContainmentGeneratorStrategy
+from operator_generator_strategies.containment_operator_strategies.window_aggregation_containment_strategy import \
+    WindowAggregationContainmentGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.filter_substitute_map_expression_startegy import \
     FilterSubstituteMapExpressionGeneratorStrategy
 from operator_generator_strategies.equivalent_operator_strategies.join_equivalent_strategy import \
@@ -97,7 +101,8 @@ def run(config_file):
                     distinctQueries.extend(getDistinctQueries(randomQueries, baseSource, sourcesToUse))
 
             # Populate remaining queries
-            remainingQueries = numberOfQueries - (numberOfQueriesPerGroup * numOfDistinctSourcesToUse * numberOfEquivalentQueryGroups)
+            remainingQueries = numberOfQueries - (
+                        numberOfQueriesPerGroup * numOfDistinctSourcesToUse * numberOfEquivalentQueryGroups)
             if remainingQueries > 0:
                 sourcesToUse = []
                 # Loop till we find a distinct set of sources to generate queries
@@ -139,11 +144,12 @@ def run(config_file):
                     getDistinctQueries(numberOfDistinctQueriesPerSource, baseSource, sourcesToUse))
         elif generateEquivalentQueries == "containment":
             percentageOfRandomQueries = configuration['containmentConfig']['percentageOfRandomQueries']
-            numberOfEquivalentQueryGroups = configuration['containmentConfig']['noOfContainmentQueryGroups']
+            percentageOfEquivalentQueries = configuration['containmentConfig']['percentageOfEquivalentQueries']
+            noOfContainmentQueryGroups = configuration['containmentConfig']['noOfContainmentQueryGroups']
             percentageOfEquivalence = configuration['containmentConfig']['percentageOfEquivalence']
-            percentageOfContainment = configuration['containmentConfig']['percentageOfContainment']
+            allowMultiContainment = configuration['containmentConfig']['allowMultiContainment']
             numberOfQueriesPerSource = int(numberOfQueries / numOfDistinctSourcesToUse)
-            numberOfQueriesPerGroup = int(numberOfQueriesPerSource / numberOfEquivalentQueryGroups)
+            numberOfQueriesPerGroup = int(numberOfQueriesPerSource / noOfContainmentQueryGroups)
             # Iterate over sources
             for i in range(numOfDistinctSourcesToUse):
                 sourcesToUse = []
@@ -159,16 +165,19 @@ def run(config_file):
 
                 baseSource = sourcesToUse[0]
                 sourcesToUse.remove(baseSource)
-                for j in range(numberOfEquivalentQueryGroups):
+                for j in range(noOfContainmentQueryGroups):
                     randomQueries = int((numberOfQueriesPerGroup * percentageOfRandomQueries) / 100)
-                    equivalentQueries.extend(getEquivalentQueries(numberOfQueriesPerGroup - randomQueries,
-                                                                  percentageOfEquivalence,
+                    numberOfEquivalentQueries = int((numberOfQueriesPerGroup * percentageOfEquivalentQueries) / 100)
+                    containmentQueries.extend(getContainmentQueries(numberOfQueriesPerGroup - randomQueries - numberOfEquivalentQueries,
+                                                                  percentageOfEquivalence, allowMultiContainment,
                                                                   baseSource, sourcesToUse))
                     distinctQueries.extend(getDistinctQueries(randomQueries, baseSource, sourcesToUse))
+                    equivalentQueries.extend(getEquivalentQueries(numberOfEquivalentQueries, percentageOfEquivalence,
+                                                                  baseSource, sourcesToUse))
 
             # Populate remaining queries
             remainingQueries = numberOfQueries - (
-                        numberOfQueriesPerGroup * numOfDistinctSourcesToUse * numberOfEquivalentQueryGroups)
+                    numberOfQueriesPerGroup * numOfDistinctSourcesToUse * noOfContainmentQueryGroups)
             if remainingQueries > 0:
                 sourcesToUse = []
                 # Loop till we find a distinct set of sources to generate queries
@@ -184,25 +193,8 @@ def run(config_file):
                 baseSource = sourcesToUse[0]
                 sourcesToUse.remove(baseSource)
                 for i in range(int(remainingQueries / numberOfQueriesPerGroup)):
-                    equivalentQueries.extend(getEquivalentQueries(numberOfQueriesPerGroup, percentageOfEquivalence,
-                                                                  baseSource, sourcesToUse))
-            if remainingQueries > 0:
-                sourcesToUse = []
-                # Loop till we find a distinct set of sources to generate queries
-                while len(sourcesToUse) == 0:
-                    numOfSourceToUse = random.randint(1, 2)
-                    sourcesToUse = random.sample(possibleSources, k=numOfSourceToUse)
-                    sourcesToUse.sort(key=lambda x: x.name, reverse=False)
-                    if str(sourcesToUse) not in distinctSourcesUsed:
-                        distinctSourcesUsed.append(str(sourcesToUse))
-                    else:
-                        sourcesToUse = []
-
-                baseSource = sourcesToUse[0]
-                sourcesToUse.remove(baseSource)
-                for i in range(int(remainingQueries / numberOfQueriesPerGroup)):
-                    containmentQueries.extend(getContainmentQueries(numberOfQueriesPerGroup, percentageOfContainment,
-                                                                  baseSource, sourcesToUse))
+                    containmentQueries.extend(getContainmentQueries(numberOfQueriesPerGroup, percentageOfEquivalence, allowMultiContainment,
+                                                                    baseSource, sourcesToUse))
 
     elif workloadType == "BiasedForHybrid":
         numberOfEquivalentQueryGroups = configuration['equivalenceConfig']['noOfEquivalentQueryGroups']
@@ -230,6 +222,7 @@ def run(config_file):
     queries: List[Query] = []
     queries.extend(equivalentQueries)
     queries.extend(distinctQueries)
+    queries.extend(containmentQueries)
     random.shuffle(queries)
     # Write queries into file
     with open("generated_queries.txt", "w+") as f:
@@ -249,7 +242,7 @@ def getDistinctQueries(numberOfQueriesToGenerate: int, baseSource: Schema, possi
     distinctOperatorGeneratorStrategies = [filter_generator, map_generator, project_generator, union_generator,
                                            join_generator, aggregation_generator]
     return QueryGenerator(baseSource, possibleSources, numberOfQueriesToGenerate, [],
-                          distinctOperatorGeneratorStrategies).generate()
+                          distinctOperatorGeneratorStrategies, []).generate()
 
 
 def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: int, baseSource: Schema,
@@ -300,10 +293,11 @@ def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: 
         equivalentOperatorGenerators.append(aggregate_equivalent_aggregate_strategy)
 
     return QueryGenerator(baseSource, possibleSources, numberOfQueriesPerGroup, equivalentOperatorGenerators,
-                          distinctOperatorGenerators).generate()
+                          distinctOperatorGenerators, []).generate()
 
-def getContainmentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: int, baseSource: Schema,
-                         possibleSources: List[Schema]) -> List[Query]:
+
+def getContainmentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: int, allowMultiContainment: bool, baseSource: Schema,
+                          possibleSources: List[Schema]) -> List[Query]:
     # Initialize instances of each generator strategy
     filter_expression_reorder_strategy = FilterExpressionReorderGeneratorStrategy()
     filter_operator_reorder_strategy = FilterOperatorReorderGeneratorStrategy()
@@ -312,8 +306,9 @@ def getContainmentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence:
     filter_substitute_map_expression_strategy = FilterSubstituteMapExpressionGeneratorStrategy()
     project_equivalent_project_strategy = ProjectEquivalentProjectGeneratorStrategy()
     aggregate_equivalent_aggregate_strategy = AggregationEquivalentAggregationGeneratorStrategy()
-    filter_containment_filter_strategy = FilterContainmentFilterGeneratorStrategy()
-
+    filter_containment_strategy = FilterContainmentGeneratorStrategy()
+    window_aggregation_containment_strategy = WindowAggregationContainmentGeneratorStrategy()
+    projection_containment_strategy = ProjectionContainmentGeneratorStrategy()
 
     # Remove the base source from possible sources for binary operator and initialize generator strategies
     union_equivalent_strategies = UnionEquivalentUnionGeneratorStrategy(possibleSources)
@@ -325,8 +320,12 @@ def getContainmentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence:
         filter_substitute_map_expression_strategy,
         filter_expression_reorder_strategy,
         filter_operator_reorder_strategy,
-        filter_containment_filter_strategy,
         project_equivalent_project_strategy
+    ]
+    containmentOperatorGeneratorStrategies = [
+        window_aggregation_containment_strategy,
+        projection_containment_strategy,
+        filter_containment_strategy
     ]
 
     filterGenerator = DistinctFilterGeneratorStrategy(max_number_of_predicates=2)
@@ -339,6 +338,9 @@ def getContainmentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence:
     distinctOperators = 5 - int((5 * percentageOfEquivalence) / 100)
     distinctOperatorGenerators = random.sample(distinctOperatorGeneratorStrategies, distinctOperators)
     equivalentOperatorGenerators = random.sample(equivalentOperatorGeneratorStrategies, 5 - distinctOperators)
+    containmentOperatorGenerators = []
+    if not allowMultiContainment:
+        containmentOperatorGenerators = random.sample(containmentOperatorGeneratorStrategies, 1)
 
     if len(possibleSources) >= 1:
         unionPresent = False
@@ -353,7 +355,8 @@ def getContainmentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence:
         equivalentOperatorGenerators.append(aggregate_equivalent_aggregate_strategy)
 
     return QueryGenerator(baseSource, possibleSources, numberOfQueriesPerGroup, equivalentOperatorGenerators,
-                          distinctOperatorGenerators).generate()
+                          distinctOperatorGenerators, containmentOperatorGenerators).generate()
+
 
 def getEquivalentQueriesForHybrid(numberOfGroupsPerSource: int, numberOfQueriesPerGroup: int,
                                   percentageOfEquivalence: int,
@@ -365,7 +368,6 @@ def getEquivalentQueriesForHybrid(numberOfGroupsPerSource: int, numberOfQueriesP
     map_expression_reorder_strategy = MapExpressionReorderGeneratorStrategy()
     map_operator_reorder_strategy = MapOperatorReorderGeneratorStrategy()
     filter_substitute_map_expression_strategy = FilterSubstituteMapExpressionGeneratorStrategy()
-    filter_equivalent_filter_strategy = FilterContainmentFilterGeneratorStrategy()
     project_equivalent_project_strategy = ProjectEquivalentProjectGeneratorStrategy()
     aggregate_equivalent_aggregate_strategy = AggregationEquivalentAggregationGeneratorStrategy()
 
@@ -378,7 +380,6 @@ def getEquivalentQueriesForHybrid(numberOfGroupsPerSource: int, numberOfQueriesP
         filter_substitute_map_expression_strategy,
         filter_expression_reorder_strategy,
         filter_operator_reorder_strategy,
-        filter_equivalent_filter_strategy,
         project_equivalent_project_strategy
     ]
 
