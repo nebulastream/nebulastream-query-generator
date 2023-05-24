@@ -13,8 +13,6 @@ containmentConfig:
   percentageOfEquivalentQueries: 0
   noOfContainmentQueryGroups: 1
   percentageOfEquivalence: 100
-  allowMultiWindow: false
-  allowUnionJoinWindowCombi: false
   allowMultiContainment: false
 sourceList:
   - streamName: 'example1'
