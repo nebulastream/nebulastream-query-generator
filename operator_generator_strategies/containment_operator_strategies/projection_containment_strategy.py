@@ -41,5 +41,6 @@ class ProjectionContainmentGeneratorStrategy(BaseGeneratorStrategy):
         for i in range(0,10):
             case = create_projection(self._base_containment.output_schema)
             containmentCases.append(case)
+        containmentCases.append(self._base_containment)
         _, containmentCase = random_list_element(containmentCases)
         return [containmentCase]
