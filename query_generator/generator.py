@@ -36,7 +36,8 @@ class QueryGenerator:
     def __init__(self, sourceToUse: Schema, possibleSources: List[Schema], numberOfQueriesToGenerate: int,
                  equivalentOperatorGenerators: List[BaseGeneratorStrategy],
                  distinctOperatorGenerators: List[BaseGeneratorStrategy],
-                 containmentOperatorGenerators: List[BaseGeneratorStrategy]):
+                 containmentOperatorGenerators: List[BaseGeneratorStrategy], shuffleContainment: bool):
+        self.shuffleContainment = shuffleContainment
         self._schema = sourceToUse
         self._possibleSources = possibleSources
         self._numberOfQueriesToGenerate = numberOfQueriesToGenerate
@@ -48,7 +49,9 @@ class QueryGenerator:
         # self.__inject_source_operators()
         sourceGenerator = DistinctSourceGeneratorStrategy()
         sourceOperator = sourceGenerator.generate(self._schema)
-
+        if self.shuffleContainment:
+            self._equivalentOperatorGenerators.extend(self._containmentOperatorGenerators)
+            self._containmentOperatorGenerators = []
         # reorder operator Generators strategies to generate valid queries
         equivalentOperatorGenerators = self.reorder_generator_strategies(self._equivalentOperatorGenerators)
 
@@ -67,17 +70,17 @@ class QueryGenerator:
                     for operator in operators:
                         newQuery.add_operator(operator)
             # Generate containment operators
-            if len(self._containmentOperatorGenerators) == 1:
-                if isinstance(self._containmentOperatorGenerators[0], WindowAggregationContainmentGeneratorStrategy) and not \
-                        self._containmentOperatorGenerators[0]._base_containment:
-                    self._containmentOperatorGenerators[0].generate(newQuery.output_schema())
-                    newQuery.add_operator(self._containmentOperatorGenerators[0]._base_containment)
-                elif isinstance(self._containmentOperatorGenerators[0], ProjectionContainmentGeneratorStrategy) and not \
-                        self._containmentOperatorGenerators[0]._base_containment:
-                    self._containmentOperatorGenerators[0].generate(newQuery.output_schema())
-                    newQuery.add_operator(self._containmentOperatorGenerators[0]._base_containment)
+            for generatorRule in self._containmentOperatorGenerators:
+                if isinstance(generatorRule, WindowAggregationContainmentGeneratorStrategy) and not \
+                        generatorRule._base_containment:
+                    generatorRule.generate(newQuery.output_schema())
+                    newQuery.add_operator(generatorRule._base_containment)
+                elif isinstance(generatorRule, ProjectionContainmentGeneratorStrategy) and not \
+                        generatorRule._base_containment:
+                    generatorRule.generate(newQuery.output_schema())
+                    newQuery.add_operator(generatorRule._base_containment)
                 else:
-                    operators = self._containmentOperatorGenerators[0].generate(newQuery.output_schema())
+                    operators = generatorRule.generate(newQuery.output_schema())
                     for operator in operators:
                         newQuery.add_operator(operator)
 

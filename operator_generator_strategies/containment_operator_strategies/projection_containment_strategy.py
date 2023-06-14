@@ -39,8 +39,12 @@ class ProjectionContainmentGeneratorStrategy(BaseGeneratorStrategy):
             self._base_containment = create_projection(schema)
         containmentCases = []
         for i in range(0,10):
-            case = create_projection(self._base_containment.output_schema)
+            if schema.__eq__(self._base_containment.output_schema):
+                case = create_projection(self._base_containment.output_schema)
+            else:
+                case = create_projection(schema)
             containmentCases.append(case)
-        containmentCases.append(self._base_containment)
+        if schema.__eq__(self._base_containment.output_schema):
+            containmentCases.append(self._base_containment)
         _, containmentCase = random_list_element(containmentCases)
         return [containmentCase]
