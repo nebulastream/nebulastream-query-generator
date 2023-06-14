@@ -3,7 +3,7 @@ noQueries: 10
 workloadType: Normal
 # Value can be equivalence, distinct, or containment
 generateEquivalentQueries: containment
-sourcesToUse: 1
+sourcesToUse: 2
 equivalenceConfig:
   percentageOfRandomQueries: 0
   noOfEquivalentQueryGroups: 1
@@ -12,8 +12,10 @@ containmentConfig:
   percentageOfRandomQueries: 0
   percentageOfEquivalentQueries: 0
   noOfContainmentQueryGroups: 1
-  percentageOfEquivalence: 100
-  allowMultiContainment: false
+  percentageOfEquivalence: 50
+  allowMultiContainment: true
+  shuffleContainment: true
+  allowMultiWindowContainment: true
 sourceList:
   - streamName: 'example1'
     intFields: [ 'a', 'b', 'c', 'd', 'e', 'f' ]

@@ -19,6 +19,7 @@ class WindowAggregationContainmentGeneratorStrategy(BaseGeneratorStrategy):
         self._baseAggregationOperations: List[Aggregations] = []
         self._fields: List[str] = []
         self._base_containment = None
+        self._base_schema = None
 
     def generate(self, schema: Schema, generateKey: bool = True) -> List[AggregationOperator]:
         """
@@ -39,7 +40,10 @@ class WindowAggregationContainmentGeneratorStrategy(BaseGeneratorStrategy):
         if not self.validation(schema):
             self.update_columns(schema)
         # create the base window aggregation
-        self._base_containment = self.createWindowAggregation(schema, self._baseWindowTimeLength, self._baseWindowTimeSlide, self._baseAggregationOperations, self._fields)
+        if self._base_containment is None:
+            self._base_containment = self.createWindowAggregation(schema, self._baseWindowTimeLength, self._baseWindowTimeSlide, self._baseAggregationOperations, self._fields)
+        if self._base_schema is None:
+            self._base_schema = schema
 
         containmentCases = []
         # create 10 random containment cases based off of the base containment case
@@ -50,7 +54,8 @@ class WindowAggregationContainmentGeneratorStrategy(BaseGeneratorStrategy):
             aggregationOperations = [self._baseAggregationOperations[j] for j in random_indices]
             aggregationFields = [self._fields[j] for j in random_indices]
             containmentCases.append(self.createWindowAggregation(schema, self._baseWindowTimeLength * time_factor, self._baseWindowTimeSlide, aggregationOperations, aggregationFields))
-        containmentCases.append(self._base_containment)
+        if schema == self._base_schema:
+            containmentCases.append(self._base_containment)
         _, containmentCase = random_list_element(containmentCases)
         return [containmentCase]
 
@@ -106,7 +111,7 @@ class WindowAggregationContainmentGeneratorStrategy(BaseGeneratorStrategy):
             fieldName = random_field_name(numericalFields)
             self._fields.append(fieldName)
             _, aggregationOperation = random_list_element(
-                [Aggregations.count, Aggregations.min, Aggregations.max, Aggregations.sum])
+                [Aggregations.min, Aggregations.max, Aggregations.sum])
             self._baseAggregationOperations.append(aggregationOperation)
         # obtain the timestamp field
         self._baseWindowTimeStamp = random_field_name(schemaCopy.get_timestamp_fields())
@@ -124,15 +129,11 @@ class WindowAggregationContainmentGeneratorStrategy(BaseGeneratorStrategy):
         return True
 
     def update_columns(self, schema: Schema):
-        for key, value in schema.get_field_name_mapping().items():
-            if value == self._schema.get_field_name_mapping()[self._baseWindowTimeStamp]:
-                self._baseWindowTimeStamp = key
-                break
+        if self._baseWindowTimeStamp not in schema.get_timestamp_fields():
+            self._baseWindowTimeStamp = random_field_name(schema.get_timestamp_fields())
 
         if self._baseWindowKey:
-            for key, value in schema.get_field_name_mapping().items():
-                if value == self._schema.get_field_name_mapping()[self._baseWindowKey]:
-                    self._baseWindowKey = key
-                    break
+            if self._baseWindowKey not in self._schema.get_field_name_mapping().values():
+                self._baseWindowKey = ""
 
         self._schema = schema
