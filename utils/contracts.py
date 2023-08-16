@@ -18,7 +18,7 @@ class LogicalOperators(enum.Enum):
     lte = "<="
     eq = "=="
     nt = "!"
-    neq = "!="
+    # neq = "!="
     # And = "&&"
     # Or = "||"
 
@@ -28,7 +28,7 @@ class Aggregations(enum.Enum):
     avg = "Avg"
     min = "Min"
     max = "Max"
-    count = "Count"
+    # count = "Count"
     median = "Median"
 
 
