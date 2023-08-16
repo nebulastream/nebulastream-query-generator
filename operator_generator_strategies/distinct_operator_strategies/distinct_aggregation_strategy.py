@@ -23,7 +23,7 @@ class DistinctAggregationGeneratorStrategy(BaseGeneratorStrategy):
             fields.remove(window._windowKey)
         _, field = random_list_element(fields)
         _, aggregationOperation = random_list_element(
-            [Aggregations.avg, Aggregations.min, Aggregations.max, Aggregations.sum, Aggregations.median, Aggregations.count])
+            [Aggregations.avg, Aggregations.min, Aggregations.max, Aggregations.sum, Aggregations.median])
 
         outputField = field
         alias = ""

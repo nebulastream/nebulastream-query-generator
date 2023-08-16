@@ -54,7 +54,6 @@ class QueryGenerator:
             self._containmentOperatorGenerators = []
         # reorder operator Generators strategies to generate valid queries
         equivalentOperatorGenerators = self.reorder_generator_strategies(self._equivalentOperatorGenerators)
-
         queries: List[Query] = []
         while len(queries) < self._numberOfQueriesToGenerate:
             newQuery = Query().add_operator(sourceOperator)
@@ -65,6 +64,14 @@ class QueryGenerator:
                         isinstance(generatorRule, JoinEquivalentJoinGeneratorStrategy):
                     operators = generatorRule.generate(newQuery)
                     newQuery = Query().add_operator(operators[0])
+                elif isinstance(generatorRule, WindowAggregationContainmentGeneratorStrategy) and not \
+                            generatorRule._base_containment:
+                    generatorRule.generate(newQuery.output_schema())
+                    newQuery.add_operator(generatorRule._base_containment)
+                elif isinstance(generatorRule, ProjectionContainmentGeneratorStrategy) and not \
+                            generatorRule._base_containment:
+                    generatorRule.generate(newQuery.output_schema())
+                    newQuery.add_operator(generatorRule._base_containment)
                 else:
                     operators = generatorRule.generate(newQuery.output_schema())
                     for operator in operators:
@@ -81,6 +88,8 @@ class QueryGenerator:
                     newQuery.add_operator(generatorRule._base_containment)
                 else:
                     operators = generatorRule.generate(newQuery.output_schema())
+                    if operators.is_empty():
+                        continue
                     for operator in operators:
                         newQuery.add_operator(operator)
 

@@ -35,7 +35,6 @@ class DistinctJoinGeneratorStrategy(BaseGeneratorStrategy):
             intFields.extend(rightSchema.get_numerical_fields())
 
             window = DistinctWindowGeneratorStrategy().generate(leftSchema, False)[0]
-
             timeStampFields = []
             for timeStampField in window.get_output_schema().timestamp_fields:
                 if timeStampField != "start" and timeStampField != "end":

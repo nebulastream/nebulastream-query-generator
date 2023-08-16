@@ -76,7 +76,7 @@ class FilterContainmentGeneratorStrategy(BaseGeneratorStrategy):
 
         elif self._containedFilterOperationCategory == 2:
             # create 10 randomly contained filter expressions with changing logical operation but same field and constant filter
-            # e.g. filter(x < 10), filter(x != 10), filter(10 > x)
+            # e.g. filter(x < 10), filter(10 >= x)
             # generates one containment relationship per group
             for i in range(10):
                 fieldAccess = FieldAccessExpression(self._filter1LhsField)
@@ -86,9 +86,9 @@ class FilterContainmentGeneratorStrategy(BaseGeneratorStrategy):
                 filterOp = self._filter1LogicalOp
                 if expressionOrder:
                     if self._filter1LogicalOp == LogicalOperators.lt:
-                        _, filterOp = random_list_element([LogicalOperators.lt, LogicalOperators.neq])
+                        _, filterOp = random_list_element([LogicalOperators.lt])
                     elif self._filter1LogicalOp == LogicalOperators.gt:
-                        _, filterOp = random_list_element([LogicalOperators.gt, LogicalOperators.neq])
+                        _, filterOp = random_list_element([LogicalOperators.gt])
                     elif self._filter1LogicalOp == LogicalOperators.lte:
                         _, filterOp = random_list_element(
                             [LogicalOperators.lte, LogicalOperators.eq, LogicalOperators.lt])
@@ -100,14 +100,14 @@ class FilterContainmentGeneratorStrategy(BaseGeneratorStrategy):
                             [LogicalOperators.eq, LogicalOperators.lte, LogicalOperators.gte])
                     elif self._filter1LogicalOp == LogicalOperators.neq:
                         _, filterOp = random_list_element(
-                            [LogicalOperators.neq, LogicalOperators.lt, LogicalOperators.gt])
+                            [LogicalOperators.lt, LogicalOperators.gt])
                     filterOp1 = FilterOperator(LogicalExpression(fieldAccess, constExpression, filterOp),
                                                schema)
                 else:
                     if self._filter1LogicalOp == LogicalOperators.gt:
-                        _, filterOp = random_list_element([LogicalOperators.lt, LogicalOperators.neq])
+                        _, filterOp = random_list_element([LogicalOperators.lt])
                     elif self._filter1LogicalOp == LogicalOperators.lt:
-                        _, filterOp = random_list_element([LogicalOperators.gt, LogicalOperators.neq])
+                        _, filterOp = random_list_element([LogicalOperators.gt])
                     elif self._filter1LogicalOp == LogicalOperators.gte:
                         _, filterOp = random_list_element(
                             [LogicalOperators.lte, LogicalOperators.eq, LogicalOperators.lt])
@@ -119,7 +119,7 @@ class FilterContainmentGeneratorStrategy(BaseGeneratorStrategy):
                             [LogicalOperators.eq, LogicalOperators.lte, LogicalOperators.gte])
                     elif self._filter1LogicalOp == LogicalOperators.neq:
                         _, filterOp = random_list_element(
-                            [LogicalOperators.neq, LogicalOperators.lt, LogicalOperators.gt])
+                            [LogicalOperators.lt, LogicalOperators.gt])
 
                     filterOp1 = FilterOperator(LogicalExpression(constExpression, fieldAccess, filterOp),
                                                schema)
@@ -179,12 +179,15 @@ class FilterContainmentGeneratorStrategy(BaseGeneratorStrategy):
             self._contValue = random_int_between(1, 100)
         _, self._filter1ArithOp = random_list_element(list(ArithmeticOperators))
         _, self._filter1LogicalOp = random_list_element(
-            [LogicalOperators.lt, LogicalOperators.gt, LogicalOperators.lte, LogicalOperators.gte, LogicalOperators.eq,
-             LogicalOperators.neq])
+            [LogicalOperators.lt, LogicalOperators.gt, LogicalOperators.lte, LogicalOperators.gte])
         self._schema = schema
 
     def validation(self, schema: Schema) -> bool:
         if self._filter1LhsField not in schema.get_numerical_fields():
+            return False
+        elif self._filter1RhsField not in schema.get_numerical_fields():
+            return False
+        elif self._filter2LhsField not in schema.get_numerical_fields():
             return False
         return True
 

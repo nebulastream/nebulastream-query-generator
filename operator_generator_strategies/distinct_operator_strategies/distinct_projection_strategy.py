@@ -23,20 +23,19 @@ class DistinctProjectionGeneratorStrategy(BaseGeneratorStrategy):
 
         newFiledNames = []
 
-        if bool(random.getrandbits(1)):
-            fieldMapping = {}
-            for i in range(len(fields)):
-                newFieldName = random_name()
-                fieldMapping[newFieldName] = fields[i]
-                newFiledNames.append(newFieldName)
+        #if bool(random.getrandbits(1)):
+        #    fieldMapping = {}
+        #    for i in range(len(fields)):
+        #        newFieldName = random_name()
+        #        fieldMapping[newFieldName] = fields[i]
+        #        newFiledNames.append(newFieldName)
 
-            schema = Schema(name=schema.name, int_fields=newFiledNames, double_fields=schema.double_fields,
-                            string_fields=schema.string_fields,
-                            timestamp_fields=schema.timestamp_fields, fieldNameMapping=fieldMapping)
-        else:
-            schema = Schema(name=schema.name, int_fields=fields, double_fields=schema.double_fields,
+        #    schema = Schema(name=schema.name, int_fields=newFiledNames, double_fields=schema.double_fields,
+        #                    string_fields=schema.string_fields,
+        #                    timestamp_fields=schema.timestamp_fields, fieldNameMapping=fieldMapping)
+        #else:
+        schema = Schema(name=schema.name, int_fields=fields, double_fields=schema.double_fields,
                             string_fields=schema.string_fields,
                             timestamp_fields=schema.timestamp_fields, fieldNameMapping=schema.get_field_name_mapping())
-
         project = ProjectOperator(fieldsToProject=fields, newFieldNames=newFiledNames, schema=schema)
         return [project]

@@ -49,10 +49,15 @@ class WindowAggregationContainmentGeneratorStrategy(BaseGeneratorStrategy):
         # create 10 random containment cases based off of the base containment case
         for i in range(0, 10):
             time_factor = random_int_between(1, 10)
-            numberOfAggregates = random_int_between(1, len(self._baseAggregationOperations))
-            random_indices = random.sample(range(len(self._baseAggregationOperations)), numberOfAggregates)
+            numberOfAggregates = random_int_between(1, len(self._fields))
+            random_indices = random.sample(range(len(self._fields)), numberOfAggregates)
             aggregationOperations = [self._baseAggregationOperations[j] for j in random_indices]
             aggregationFields = [self._fields[j] for j in random_indices]
+            for agg in aggregationFields:
+                if agg not in schema.get_numerical_fields():
+                    aggregationFields.remove(agg)
+            if len(aggregationFields) == 0:
+                return []
             containmentCases.append(self.createWindowAggregation(schema, self._baseWindowTimeLength * time_factor, self._baseWindowTimeSlide, aggregationOperations, aggregationFields))
         if schema == self._base_schema:
             containmentCases.append(self._base_containment)
@@ -126,6 +131,13 @@ class WindowAggregationContainmentGeneratorStrategy(BaseGeneratorStrategy):
     def validation(self, schema: Schema) -> bool:
         if self._baseWindowTimeStamp not in schema.get_timestamp_fields():
             return False
+        if self._baseWindowKey:
+            if self._baseWindowKey not in self._schema.get_field_name_mapping().values():
+                return False
+        if self._fields:
+            for field in self._fields:
+                if field not in schema.get_numerical_fields():
+                    return False
         return True
 
     def update_columns(self, schema: Schema):
@@ -135,5 +147,8 @@ class WindowAggregationContainmentGeneratorStrategy(BaseGeneratorStrategy):
         if self._baseWindowKey:
             if self._baseWindowKey not in self._schema.get_field_name_mapping().values():
                 self._baseWindowKey = ""
-
+        if self._fields:
+            for field in self._fields:
+                if field not in schema.get_numerical_fields():
+                   self._fields.remove(field)
         self._schema = schema

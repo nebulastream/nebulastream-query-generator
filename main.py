@@ -148,7 +148,7 @@ def run(config_file):
             noOfContainmentQueryGroups = configuration['containmentConfig']['noOfContainmentQueryGroups']
             percentageOfEquivalence = configuration['containmentConfig']['percentageOfEquivalence']
             allowMultiContainment = configuration['containmentConfig']['allowMultiContainment']
-            allowMultiWindowContainment = configuration['containmentConfig']['allowMultiWindowContainment']
+            allowMultiWindowContainment = configuration['containmentConfig']['allowMultipleWindows']
             shuffleContainment = configuration['containmentConfig']['shuffleContainment']
             numberOfQueriesPerSource = int(numberOfQueries / numOfDistinctSourcesToUse)
             numberOfQueriesPerGroup = int(numberOfQueriesPerSource / noOfContainmentQueryGroups)
@@ -227,7 +227,7 @@ def run(config_file):
     queries.extend(containmentQueries)
     random.shuffle(queries)
     # Write queries into file
-    with open("generated_queries.txt", "w+") as f:
+    with open("example-query.txt", "w+") as f:
         for query in queries:
             f.write(query.generate_code())
             f.write("\n")
@@ -259,8 +259,14 @@ def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: 
     aggregate_equivalent_aggregate_strategy = AggregationEquivalentAggregationGeneratorStrategy()
 
     # Remove the base source from possible sources for binary operator and initialize generator strategies
-    union_equivalent_strategies = UnionEquivalentUnionGeneratorStrategy(possibleSources)
-    join_equivalent_strategies = JoinEquivalentJoinGeneratorStrategy(possibleSources)
+    unionPossible = False
+    joinPossible = False
+    if len(possibleSources) > 0 and baseSource.get_numerical_fields().__eq__(possibleSources[0].get_numerical_fields()):
+        union_equivalent_strategies = UnionEquivalentUnionGeneratorStrategy(possibleSources)
+        unionPossible = True
+    elif len(possibleSources) > 0:
+        join_equivalent_strategies = JoinEquivalentJoinGeneratorStrategy(possibleSources)
+        joinPossible = True
 
     equivalentOperatorGeneratorStrategies = [
         map_expression_reorder_strategy,
@@ -268,37 +274,40 @@ def getEquivalentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: 
         filter_substitute_map_expression_strategy,
         filter_expression_reorder_strategy,
         filter_operator_reorder_strategy,
-        project_equivalent_project_strategy
+        project_equivalent_project_strategy,
+        aggregate_equivalent_aggregate_strategy
     ]
 
     filterGenerator = DistinctFilterGeneratorStrategy(max_number_of_predicates=2)
     mapGenerator = DistinctMapGeneratorStrategy1()
     aggregateGenerator = DistinctAggregationGeneratorStrategy()
     projectGenerator = DistinctProjectionGeneratorStrategy()
-    distinctOperatorGeneratorStrategies = [filterGenerator, mapGenerator, aggregateGenerator, projectGenerator,
-                                           mapGenerator]
+    distinctOperatorGeneratorStrategies = [filterGenerator, mapGenerator, projectGenerator,
+                                           mapGenerator, aggregateGenerator]
 
     distinctOperators = 5 - int((5 * percentageOfEquivalence) / 100)
     distinctOperatorGenerators = random.sample(distinctOperatorGeneratorStrategies, distinctOperators)
     equivalentOperatorGenerators = random.sample(equivalentOperatorGeneratorStrategies, 5 - distinctOperators)
 
+    joinPresent = False
     if len(possibleSources) >= 1:
         unionPresent = False
-        if random.randint(1, 2) % 2 == 0:
+        if random.randint(1, 2) % 2 == 0 and unionPossible:
             equivalentOperatorGenerators.append(union_equivalent_strategies)
             unionPresent = True
 
-        if not unionPresent:
+        if not unionPresent and joinPossible:
             equivalentOperatorGenerators.append(join_equivalent_strategies)
+            joinPresent = True
 
-    if random.randint(1, 5) % 5 == 0:
+    if random.randint(1, 5) % 5 == 0 and distinctOperators == 0 and not joinPresent:
         equivalentOperatorGenerators.append(aggregate_equivalent_aggregate_strategy)
 
     return QueryGenerator(baseSource, possibleSources, numberOfQueriesPerGroup, equivalentOperatorGenerators,
                           distinctOperatorGenerators, [], False).generate()
 
 
-def getContainmentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: int, allowMultiContainment: bool, allowMultiWindowContainment:bool, shuffleContainment: bool, baseSource: Schema,
+def getContainmentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence: int, allowMultiContainment: bool, allowMultipleWindows:bool, shuffleContainment: bool, baseSource: Schema,
                           possibleSources: List[Schema]) -> List[Query]:
     # Initialize instances of each generator strategy
     filter_expression_reorder_strategy = FilterExpressionReorderGeneratorStrategy()
@@ -313,9 +322,16 @@ def getContainmentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence:
     projection_containment_strategy = ProjectionContainmentGeneratorStrategy()
 
     # Remove the base source from possible sources for binary operator and initialize generator strategies
-    union_equivalent_strategies = UnionEquivalentUnionGeneratorStrategy(possibleSources)
-    join_equivalent_strategies = JoinEquivalentJoinGeneratorStrategy(possibleSources)
+    unionPossible = False
+    joinPossible = False
+    if len(possibleSources) > 0 and baseSource.get_numerical_fields().__eq__(possibleSources[0].get_numerical_fields()):
+        union_equivalent_strategies = UnionEquivalentUnionGeneratorStrategy(possibleSources)
+        unionPossible = True
+    elif len(possibleSources) > 0:
+        join_equivalent_strategies = JoinEquivalentJoinGeneratorStrategy(possibleSources)
+        joinPossible = True
 
+    # add equivalent operator generator strategies
     equivalentOperatorGeneratorStrategies = [
         map_expression_reorder_strategy,
         map_operator_reorder_strategy,
@@ -324,6 +340,7 @@ def getContainmentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence:
         filter_operator_reorder_strategy,
         project_equivalent_project_strategy
     ]
+    # add containment operator generator strategies
     containmentOperatorGeneratorStrategies = [
         window_aggregation_containment_strategy,
         projection_containment_strategy,
@@ -332,32 +349,40 @@ def getContainmentQueries(numberOfQueriesPerGroup: int, percentageOfEquivalence:
 
     filterGenerator = DistinctFilterGeneratorStrategy(max_number_of_predicates=2)
     mapGenerator = DistinctMapGeneratorStrategy1()
-    aggregateGenerator = DistinctAggregationGeneratorStrategy()
     projectGenerator = DistinctProjectionGeneratorStrategy()
-    distinctOperatorGeneratorStrategies = [filterGenerator, mapGenerator, aggregateGenerator, projectGenerator,
+    distinctOperatorGeneratorStrategies = [filterGenerator, mapGenerator, projectGenerator,
                                            mapGenerator]
+    if allowMultipleWindows:
+        aggregateGenerator = DistinctAggregationGeneratorStrategy()
+        distinctOperatorGeneratorStrategies.append(aggregateGenerator)
 
     distinctOperators = 5 - int((5 * percentageOfEquivalence) / 100)
     distinctOperatorGenerators = random.sample(distinctOperatorGeneratorStrategies, distinctOperators)
     equivalentOperatorGenerators = random.sample(equivalentOperatorGeneratorStrategies, 5 - distinctOperators)
     containmentOperatorGenerators = random.sample(containmentOperatorGeneratorStrategies, 1)
+
+    # add a random number (1-5) of containment operators if multicontainment is allowed
     if allowMultiContainment:
         numberOfContainments = random.randint(1, 5)
-        if containmentOperatorGenerators[0] == window_aggregation_containment_strategy and allowMultiWindowContainment:
+        if containmentOperatorGenerators[0] == window_aggregation_containment_strategy and allowMultipleWindows:
             numberOfContainments = random.randint(1, 3)
-        for i in range(numberOfContainments):
-            containmentOperatorGenerators.append(containmentOperatorGenerators[0])
+            for i in range(numberOfContainments):
+                containmentOperatorGenerators.append(containmentOperatorGenerators[0])
+        elif containmentOperatorGenerators[0] != window_aggregation_containment_strategy:
+            for i in range(numberOfContainments):
+                containmentOperatorGenerators.append(containmentOperatorGenerators[0])
 
+    # add union and join operators if the configuration allows it
     if len(possibleSources) >= 1:
         unionPresent = False
-        if random.randint(1, 2) % 2 == 0:
+        if random.randint(1, 2) % 2 == 0 and unionPossible:
             equivalentOperatorGenerators.append(union_equivalent_strategies)
             unionPresent = True
-
-        if not unionPresent:
+        if not unionPresent and joinPossible and not containmentOperatorGenerators[0] == window_aggregation_containment_strategy:
             equivalentOperatorGenerators.append(join_equivalent_strategies)
 
-    if random.randint(1, 5) % 5 == 0 and distinctOperators == 0:
+    # add aggregate operator if the configuration allows it
+    if allowMultipleWindows and random.randint(1, 5) % 5 == 0 and distinctOperators == 0:
         equivalentOperatorGenerators.append(aggregate_equivalent_aggregate_strategy)
 
     return QueryGenerator(baseSource, possibleSources, numberOfQueriesPerGroup, equivalentOperatorGenerators,
