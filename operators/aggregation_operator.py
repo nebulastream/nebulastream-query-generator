@@ -12,9 +12,13 @@ class AggregationOperator(Operator):
         self._window = window
 
     def generate_code(self) -> str:
+        print(self._aggregations)
+        print(self._aggregations[0])
+        # adds the first aggregation from the aggregations list to the window operator
         code = f"{self._window.generate_code()}.apply({self._aggregations[0]}"
         if self._alias:
             code = f"{code}->as(Attribute(\"{self._alias}\"))"
+        # in case the aggregations list's size is larger than 1, add the rest of the aggregations to the window operator
         if len(self._aggregations) > 1:
             for i in range(1, len(self._aggregations)):
                 code = f"{code}, {self._aggregations[i]}"

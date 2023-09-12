@@ -7,7 +7,22 @@ from operators.map_operator import MapOperator
 from utils.contracts import *
 from utils.utils import *
 
-
+"""
+The filter containment strategy entails four different strategies to generate filter containment cases.
+Those strategies are:
+1. The filter containment strategy combines the same map operation with a different filter operation for query pairs in
+a contained group, e.g. .map(a = a * 10).filter(a < 35) vs .map(a = a * 10).filter(a < 32). It generates 9
+containment cases. Later the generator randomly chooses one for each query in the contained group.
+2. The filter containment strategy creates ten filter operators comparing the same two attributes utilizing different transformations,
+e.g. .filter(a * 4 < b * 4) vs .filter(a * 6 < b * 6); the generator later randomly chooes one of the generated filters for a query in 
+each contained query group
+3. The filter containment strategy chooses a random integer from the interval [1, 100] and a random field to apply the filter operator to.
+It then applies different logical operations that exhibit containment relationships with respect to a base logical operator to create
+10 filter operations, e.g. base logical operator is == and it chooses 10, then we can obtain filters such as .filter(a == 10), .filter(a <= 10),
+.filter(10 >= a) and so on. 
+4. The last strategy varies the random integer value for each generated filter operation but keeps the direction of the logical operation.
+e.g. .filter(a < 11), .filter(a <= 50), .filter(60 > a), and so on. It also generates 10 cases.
+"""
 class FilterContainmentGeneratorStrategy(BaseGeneratorStrategy):
     def __init__(self):
         super().__init__()
@@ -46,7 +61,10 @@ class FilterContainmentGeneratorStrategy(BaseGeneratorStrategy):
                                                         ConstantExpression(str(contValue)), self._filter1ArithOp)
                 arithExpression2 = ArithmeticExpression(FieldAccessExpression(self._filter1RhsField),
                                                         ConstantExpression(str(contValue)), self._filter1ArithOp)
-                if self._filter1LogicalOp == LogicalOperators.neq or self._filter1LogicalOp == LogicalOperators.eq:
+                # neq = "!=" is disabled since NebulaStream treats neq as one Expression Node and therefore
+                # the signature creation fails
+                #if self._filter1LogicalOp == LogicalOperators.neq or self._filter1LogicalOp == LogicalOperators.eq:
+                if self._filter1LogicalOp == LogicalOperators.eq:
                     _, self._filter1LogicalOp = random_list_element(
                         [LogicalOperators.lt, LogicalOperators.gt, LogicalOperators.lte, LogicalOperators.gte])
                 filterOp = FilterOperator(
@@ -59,11 +77,14 @@ class FilterContainmentGeneratorStrategy(BaseGeneratorStrategy):
             arithExpression = ArithmeticExpression(ConstantExpression(str(contValue)),
                                                    FieldAccessExpression(self._filter2LhsField),
                                                    ArithmeticOperators.Mul)
-            # creates the same map operation for all equal query groups, e.g. .map(y = y*10)
+            # creates the same map operation for all contained query groups, e.g. .map(y = y*10)
             mapOp = MapOperator(
                 FieldAssignmentExpression(FieldAccessExpression(self._filter2LhsField), arithExpression),
                 schema)
-            if self._filter1LogicalOp == LogicalOperators.neq or self._filter1LogicalOp == LogicalOperators.eq:
+            # neq = "!=" is disabled since NebulaStream treats neq as one Expression Node and therefore
+            # the signature creation fails
+            #if self._filter1LogicalOp == LogicalOperators.neq or self._filter1LogicalOp == LogicalOperators.eq:
+            if self._filter1LogicalOp == LogicalOperators.eq:
                 _, self._filter1LogicalOp = random_list_element(
                     [LogicalOperators.lt, LogicalOperators.gt, LogicalOperators.lte, LogicalOperators.gte])
             # adds a random filter operation to the attribute for which the map operation was created
@@ -98,9 +119,11 @@ class FilterContainmentGeneratorStrategy(BaseGeneratorStrategy):
                     elif self._filter1LogicalOp == LogicalOperators.eq:
                         _, filterOp = random_list_element(
                             [LogicalOperators.eq, LogicalOperators.lte, LogicalOperators.gte])
-                    elif self._filter1LogicalOp == LogicalOperators.neq:
-                        _, filterOp = random_list_element(
-                            [LogicalOperators.lt, LogicalOperators.gt])
+                    # neq = "!=" is disabled since NebulaStream treats neq as one Expression Node and therefore
+                    # the signature creation fails
+                    #elif self._filter1LogicalOp == LogicalOperators.neq:
+                    #    _, filterOp = random_list_element(
+                    #        [LogicalOperators.lt, LogicalOperators.gt])
                     filterOp1 = FilterOperator(LogicalExpression(fieldAccess, constExpression, filterOp),
                                                schema)
                 else:
@@ -117,9 +140,11 @@ class FilterContainmentGeneratorStrategy(BaseGeneratorStrategy):
                     elif self._filter1LogicalOp == LogicalOperators.eq:
                         _, filterOp = random_list_element(
                             [LogicalOperators.eq, LogicalOperators.lte, LogicalOperators.gte])
-                    elif self._filter1LogicalOp == LogicalOperators.neq:
-                        _, filterOp = random_list_element(
-                            [LogicalOperators.lt, LogicalOperators.gt])
+                    # neq = "!=" is disabled since NebulaStream treats neq as one Expression Node and therefore
+                    # the signature creation fails
+                    #elif self._filter1LogicalOp == LogicalOperators.neq:
+                    #    _, filterOp = random_list_element(
+                    #        [LogicalOperators.lt, LogicalOperators.gt])
 
                     filterOp1 = FilterOperator(LogicalExpression(constExpression, fieldAccess, filterOp),
                                                schema)
@@ -141,7 +166,10 @@ class FilterContainmentGeneratorStrategy(BaseGeneratorStrategy):
                         _, filterOp = random_list_element([LogicalOperators.lt, LogicalOperators.lte])
                     elif self._filter1LogicalOp == LogicalOperators.gt or self._filter1LogicalOp == LogicalOperators.gte:
                         _, filterOp = random_list_element([LogicalOperators.gt, LogicalOperators.gte])
-                    elif self._filter1LogicalOp == LogicalOperators.neq or self._filter1LogicalOp == LogicalOperators.eq:
+                        # neq = "!=" is disabled since NebulaStream treats neq as one Expression Node and therefore
+                        # the signature creation fails
+                    #elif self._filter1LogicalOp == LogicalOperators.neq or self._filter1LogicalOp == LogicalOperators.eq:
+                    elif self._filter1LogicalOp == LogicalOperators.eq:
                         _, self._filter1LogicalOp = random_list_element(
                             [LogicalOperators.lt, LogicalOperators.gt, LogicalOperators.lte, LogicalOperators.gte])
                         filterOp = self._filter1LogicalOp
@@ -152,7 +180,10 @@ class FilterContainmentGeneratorStrategy(BaseGeneratorStrategy):
                         _, filterOp = random_list_element([LogicalOperators.gt, LogicalOperators.gte])
                     elif self._filter1LogicalOp == LogicalOperators.gt or self._filter1LogicalOp == LogicalOperators.gte:
                         _, filterOp = random_list_element([LogicalOperators.lt, LogicalOperators.lte])
-                    elif self._filter1LogicalOp == LogicalOperators.neq or self._filter1LogicalOp == LogicalOperators.eq:
+                        # neq = "!=" is disabled since NebulaStream treats neq as one Expression Node and therefore
+                        # the signature creation fails
+                    #elif self._filter1LogicalOp == LogicalOperators.neq or self._filter1LogicalOp == LogicalOperators.eq:
+                    elif self._filter1LogicalOp == LogicalOperators.eq:
                         _, self._filter1LogicalOp = random_list_element(
                             [LogicalOperators.lt, LogicalOperators.gt, LogicalOperators.lte, LogicalOperators.gte])
                         filterOp = self._filter1LogicalOp

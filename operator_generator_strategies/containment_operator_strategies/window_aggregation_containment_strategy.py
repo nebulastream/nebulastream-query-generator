@@ -40,6 +40,7 @@ class WindowAggregationContainmentGeneratorStrategy(BaseGeneratorStrategy):
         if not self.validation(schema):
             self.update_columns(schema)
         # create the base window aggregation
+        print(self._baseAggregationOperations)
         if self._base_containment is None:
             self._base_containment = self.createWindowAggregation(schema, self._baseWindowTimeLength, self._baseWindowTimeSlide, self._baseAggregationOperations, self._fields)
         if self._base_schema is None:
