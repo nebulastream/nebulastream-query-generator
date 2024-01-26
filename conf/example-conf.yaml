@@ -1,12 +1,21 @@
-noQueries: 102400
+noQueries: 100
 # Value can be Normal or BiasedForHybrid
 workloadType: Normal
-generateEquivalentQueries: true
-sourcesToUse: 256
+# Value can be equivalence, distinct, or containment
+generateEquivalentQueries: containment
+sourcesToUse: 4
 equivalenceConfig:
   percentageOfRandomQueries: 0
   noOfEquivalentQueryGroups: 10
   percentageOfEquivalence: 100
+containmentConfig:
+  percentageOfRandomQueries: 0
+  percentageOfEquivalentQueries: 0
+  noOfContainmentQueryGroups: 10
+  percentageOfEquivalence: 50
+  allowMultiContainment: True
+  shuffleContainment: True
+  allowMultipleWindows: False
 sourceList:
   - streamName: 'example1'
     intFields: [ 'a', 'b', 'c', 'd', 'e', 'f' ]

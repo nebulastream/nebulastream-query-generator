@@ -46,7 +46,7 @@ class AggregationEquivalentAggregationGeneratorStrategy(BaseGeneratorStrategy):
             windowType = f"{windowType.value}::of(EventTime(Attribute(\"{self._timestampField}\")), {timeUnit.value}({windowLength}))"
 
         schema = Schema(name=schema.name, int_fields=[self._windowKey], double_fields=[], string_fields=[],
-                        timestamp_fields=[self._timestampField], fieldNameMapping=schema.get_field_name_mapping())
+                        timestamp_fields=["start", "end"], fieldNameMapping=schema.get_field_name_mapping())
         window = WindowOperator(windowType=windowType, windowKey=self._windowKey, schema=schema)
 
         aggregation = f"{self._aggregationOperation.value}(Attribute(\"{self._field}\"))"
@@ -61,7 +61,7 @@ class AggregationEquivalentAggregationGeneratorStrategy(BaseGeneratorStrategy):
         schema = Schema(name=schema.name, int_fields=[outputField], double_fields=[], string_fields=[],
                         timestamp_fields=window.get_output_schema().timestamp_fields,
                         fieldNameMapping={outputField: self._field})
-        aggregationOperator = AggregationOperator(aggregation=aggregation, alias=alias, window=window, schema=schema)
+        aggregationOperator = AggregationOperator(aggregations=[aggregation], alias=alias, window=window, schema=schema)
         return [aggregationOperator]
 
     def __initializeEquivalentFilters(self, schema: Schema):
@@ -95,5 +95,9 @@ class AggregationEquivalentAggregationGeneratorStrategy(BaseGeneratorStrategy):
                 if value == self._schema.get_field_name_mapping()[self._windowKey]:
                     self._windowKey = key
                     break
+
+        if self._timestampField:
+            if self._timestampField not in schema.get_timestamp_fields():
+                self._timestampField = random_field_name(schema.get_timestamp_fields())
 
         self._schema = schema

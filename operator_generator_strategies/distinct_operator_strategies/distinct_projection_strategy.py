@@ -37,6 +37,5 @@ class DistinctProjectionGeneratorStrategy(BaseGeneratorStrategy):
             schema = Schema(name=schema.name, int_fields=fields, double_fields=schema.double_fields,
                             string_fields=schema.string_fields,
                             timestamp_fields=schema.timestamp_fields, fieldNameMapping=schema.get_field_name_mapping())
-
         project = ProjectOperator(fieldsToProject=fields, newFieldNames=newFiledNames, schema=schema)
         return [project]

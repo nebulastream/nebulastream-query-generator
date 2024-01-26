@@ -34,7 +34,16 @@ The Query Generator produces a semantically equal query in two steps.
 First, the Query Generator selects for each operator in the base synthetic query an Equivalent Operator Strategy.
 Second, the Generator iterates over the selected Equivalent Operator Strategies and constructs a new synthetic query.
 
+### Generating Semantically Contained Query
 
+Our Query Generator is capable of generating a collection of semantically contained queries based on a synthetic query.
+These queries are semantically contained but syntactically distinct.
+To this end, our Query Generator consists of [Containment Operator Strategies](operator_generator_strategies/containment_operator_strategies).
+A Containment Operator Strategy initializes itself based on an operator.
+For each successive call, the Containment Operator Strategy produces a syntactically distinct but semantically contained
+operator of same type.
+For example, a _Filter_ Containment Operator Strategy initializes with the predicate **a>3** produces a
+syntactically distinct but semantically equivalent _**Filter**_ operator with predicate **a>7** or **9<a**.
 
 ### Generating A Partially Equivalent Query
 
@@ -47,18 +56,32 @@ Third, the Generator combines the Equivalent Operator Strategies with a set of D
 Fourth, the Generator iterates over the Operator Strategies and computes partially equivalent synthetic query.
 </p>
 
+### Generating A Contained Query
+
+<p style='text-align: justify;'>
+Our Query Generator can generate a collection of contained queries based on a synthetic query.
+To this end, our Query Generator follows a five-step process.
+First, the Query Generator selects the source operators from the synthetic query for partial containment.
+Second, the Generator initializes a set of Equivalent Operator Strategies.
+Third, the Generator initializes a set of Contained Operator Strategies.
+Fourth, the Generator combines the Equivalent Operator Strategies and the Contained Operator Strategies 
+with a set of Distinct Operator Strategies.
+Fifth, the Generator iterates over the Operator Strategies and computes contained synthetic queries.
+</p>
+
 ### Generating Synthetic Query Set
 
 <p style='text-align: justify;'> The Query Generator takes as inputs the total number of queries to generate, a collection of distinct
-sources to use, number of equivalent query groups to produce, the percentage of semantically distinct queries to generate,
-and a percentage of equivalence among semantically equivalent queries.
+sources to use, an enum indicating what kind of queries to produce, number of equivalent/contained query groups to produce, 
+the percentage of semantically distinct queries to generate,
+and a percentage of equivalence among semantically equivalent/contained queries.
 The Query Generator then generates the queries using the following five-Step process: </p>
 
 1. The Query Generator calculates the number of queries per source by dividing total number of queries by the number of sources.
-2. For each distinct source, the Query Generator calculates number of queries in each equivalent query group.
+2. For each distinct source, the Query Generator calculates number of queries in each equivalent/contained query group.
 3. The generator computes semantically distinct queries based on the percentage of semantically distinct queries to generate for each group.
-4. The generator calculates the number of equivalent queries to generate within the group.
-5. The generator based on the value of percentage of equivalence among semantically equivalent queries generate remaining queries in the group
+4. The generator calculates the number of equivalent/contained queries to generate within the group.
+5. The generator based on the value of percentage of equivalence among semantically equivalent/contained queries generates the remaining queries in the group
 
 ## Installation
 
@@ -85,9 +108,9 @@ workloadType: (String) Normal or BiasedForHybrid.
 ```
 
 ```
-generateEquivalentQueries: (Bool) "true" indicates if equivalent queries needed to be generated "explicitly".
-                           Note: It can happen that despite providing "false", 
-                           some of the generated queries are equivalent.`
+generateEquivalentQueries: (enum) equivalence, distinct, or containment; indicates what type of query sets we want to generate.
+                           Note: It can happen that despite providing distinct, 
+                           some of the generated queries are equivalent or contained.`
 ```
 
 ```
@@ -103,6 +126,28 @@ equivalenceConfig:
     percentageOfRandomQueries: (Int) value betwen 0-100 indicates the percentage of distinct queries within each query 
                                 group such that those queries are semantically distinct to rest of the queries in the group.
     percentageOfEquivalence: (Int) value between 0-100 indicating the percentage of overlap among queries in a query group.
+```
+
+```
+containmentConfig:
+    noOfEquivalentQueryGroups:      (Int) Number of distinct query groups within the overall query set. Such that, each query 
+                                    in a group is based on same source schema and are syntactically distinct but semantically
+                                    equivalent to each other. 
+    percentageOfRandomQueries:      (Int) value betwen 0-100 indicates the percentage of distinct queries within each query 
+                                    group such that those queries are semantically distinct to rest of the queries in the group.
+    percentageOfEquivalence:        (Int) value between 0-100 indicating the percentage of operator overlap among queries in a query group.
+    percentageOfEquivalentQueries:  (Int) value between 0-100 indicating how many queries in the batch should be structurally
+                                    distinct but semantically equivalent.
+    noOfContainmentQueryGroups:     (Int) Number of distinct query groups within the overall query set. Such that, each query 
+                                    in a group is based on the same source schema and all queries in a group are syntactically 
+                                    distinct but semantically contained.
+    allowMultiContainment:          (Boolean) If true, we add multiple containment cases of one kind (choice between filter, 
+                                    projection and window aggregation containment) to a single query. If false, we add only one
+                                    containment case.
+    shuffleContainment:             (Boolean) If true, we shuffle the order of contained and equivalent operators withing a query. If false,
+                                    we first add the equivalent operators and then the contained operators.
+    allowMultipleWindows:           (Boolean) If true, we allow multiple window aggregations in a single query. If false, we allow only
+                                    one window aggregation in a single query.
 ```
 
 ```

@@ -63,7 +63,7 @@ class JoinEquivalentJoinGeneratorStrategy(BaseGeneratorStrategy):
             windowType = f"{windowType.value}::of(EventTime(Attribute(\"{self._timestampField}\")), {timeUnit.value}({windowLength}))"
 
         schema = Schema(name=schema.name, int_fields=[self._joinKey], double_fields=[], string_fields=[],
-                        timestamp_fields=[self._timestampField], fieldNameMapping=schema.get_field_name_mapping())
+                        timestamp_fields=["start", "end"], fieldNameMapping=schema.get_field_name_mapping())
         window = WindowOperator(windowType=windowType, windowKey=self._joinKey, schema=schema)
 
         outputIntFields = self._leftSchema.get_numerical_fields() + self._rightSchema.get_numerical_fields()

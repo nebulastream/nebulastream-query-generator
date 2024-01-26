@@ -18,6 +18,10 @@ class LogicalOperators(enum.Enum):
     lte = "<="
     eq = "=="
     nt = "!"
+    # Signature creation for neq in NebulaStream does not work properly atm. Therefore, neq is commented.
+    # Suspected reason for problems with Signature creation: NebulaStream only creates one Expression Node for neq,
+    # signature creation util expects two Expression Nodes for arithmetic operators.
+    # neq = "!="
     # And = "&&"
     # Or = "||"
 
