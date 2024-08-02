@@ -7,6 +7,37 @@ After that, we describe the process of generating a syntactically equivalent que
 In the end, we describe the process of generating a partially equivalent query based on a synthetic query.
 After generating a synthetic query set, our Query Generator shuffles the query set.
 
+This query gernerator was used in the EDBT 2023 publication, Incremental Stream Query Merging. Please use the trailing citation when refering to this work:
+
+```citation
+@inproceedings{DBLP:conf/edbt/ChaudharyZMK23,
+  author       = {Ankit Chaudhary and
+                  Steffen Zeuch and
+                  Volker Markl and
+                  Jeyhun Karimov},
+  editor       = {Julia Stoyanovich and
+                  Jens Teubner and
+                  Nikos Mamoulis and
+                  Evaggelia Pitoura and
+                  Jan M{\"{u}}hlig and
+                  Katja Hose and
+                  Sourav S. Bhowmick and
+                  Matteo Lissandrini},
+  title        = {Incremental Stream Query Merging},
+  booktitle    = {Proceedings 26th International Conference on Extending Database Technology,
+                  {EDBT} 2023, Ioannina, Greece, March 28-31, 2023},
+  pages        = {604--617},
+  publisher    = {OpenProceedings.org},
+  year         = {2023},
+  url          = {https://doi.org/10.48786/edbt.2023.51},
+  doi          = {10.48786/EDBT.2023.51},
+  timestamp    = {Sat, 29 Apr 2023 13:06:22 +0200},
+  biburl       = {https://dblp.org/rec/conf/edbt/ChaudharyZMK23.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
+```
+
+
 ### Generating A Synthetic Query
 
 Our Query Generator contains a collection of [Distinct Operator Strategies](operator_generator_strategies/distinct_operator_strategies).
@@ -88,6 +119,10 @@ The Query Generator then generates the queries using the following five-Step pro
 The [requirements.txt](requirements.txt) file should list all Python libraries that this project depend on, and they will be installed using
 
 `pip install -r requirements.txt`
+
+Additionally, you need to install git lsf utility to clone the repo.
+
+`sudo apt install git-lfs`
 
 ## How To Run
 
