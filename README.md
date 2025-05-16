@@ -4,10 +4,10 @@
 This project represents the Query Generator that generates large volumes of synthetic queries with different characteristics for NebulaStream.
 We first describe the process of generating a synthetic query.
 After that, we describe the process of generating a syntactically equivalent query based on a synthetic query.
-In the end, we describe the process of generating a partially equivalent query based on a synthetic query.
+Ultimately, we describe the process of generating a partially equivalent query based on a synthetic query.
 After generating a synthetic query set, our Query Generator shuffles the query set.
 
-This query gernerator was used in the EDBT 2023 publication, Incremental Stream Query Merging. Please use the trailing citation when refering to this work:
+This query generator was used in the EDBT 2023 Incremental Stream Query Merging publication. Please use the trailing citation when referring to this work:
 
 ```citation
 @inproceedings{DBLP:conf/edbt/ChaudharyZMK23,
@@ -41,8 +41,8 @@ This query gernerator was used in the EDBT 2023 publication, Incremental Stream 
 ### Generating A Synthetic Query
 
 Our Query Generator contains a collection of [Distinct Operator Strategies](operator_generator_strategies/distinct_operator_strategies).
-A Distinct Operator Strategy generates semantically distinct operator of a specific type for each successive call.
-The Query Generator selects a set of Distinct Operator Strategies and compute a synthetic query in bottom-up fashion
+A Distinct Operator Strategy generates a semantically distinct operator of a specific type for each successive call.
+The Query Generator selects a set of Distinct Operator Strategies and computes a synthetic query in a bottom-up fashion
 using three steps.
 First, the Generator constructs a _**Source**_ operator using the _Source_ Distinct Operator Strategy and an input schema.
 Second, the Generator iterates over the remaining Distinct Operator Strategies and adds the generated operator
@@ -58,7 +58,7 @@ These queries are semantically equal but syntactically distinct.
 To this end, our Query Generator consists of several [Equivalent Operator Strategies](operator_generator_strategies/equivalent_operator_strategies).
 An Equivalent Operator Strategy initializes itself based on an operator.
 For each successive call, the Equivalent Operator Strategy produces a syntactically distinct but semantically equivalent
-operator of same type.
+operator of the same type.
 For example, a _Filter_ Equivalent Operator Strategy initializes with the predicate **a>b** produces a
 syntactically distinct but semantically equivalent _**Filter**_ operator with predicate **a*10>b*10** or **b<a**.
 The Query Generator produces a semantically equal query in two steps.
@@ -84,7 +84,7 @@ To this end, our Query Generator follows a four-step process.
 First, the Query Generator selects the upstream operators from the synthetic query for partial equivalence.
 Second, the Generator initializes a set of Equivalent Operator Strategies for the selected operators.
 Third, the Generator combines the Equivalent Operator Strategies with a set of Distinct Operator Strategies.
-Fourth, the Generator iterates over the Operator Strategies and computes partially equivalent synthetic query.
+Fourth, the Generator iterates over the Operator Strategies and computes a partially equivalent synthetic query.
 </p>
 
 ### Generating A Contained Query
@@ -97,26 +97,25 @@ Second, the Generator initializes a set of Equivalent Operator Strategies.
 Third, the Generator initializes a set of Contained Operator Strategies.
 Fourth, the Generator combines the Equivalent Operator Strategies and the Contained Operator Strategies 
 with a set of Distinct Operator Strategies.
-Fifth, the Generator iterates over the Operator Strategies and computes contained synthetic queries.
+Fifth, the generator iterates over the operator strategies and computes its synthetic queries.
 </p>
 
 ### Generating Synthetic Query Set
 
 <p style='text-align: justify;'> The Query Generator takes as inputs the total number of queries to generate, a collection of distinct
-sources to use, an enum indicating what kind of queries to produce, number of equivalent/contained query groups to produce, 
-the percentage of semantically distinct queries to generate,
+sources to use, an enum indicating what kind of queries to produce, the number of equivalent/contained query groups to produce, the percentage of semantically distinct queries to generate,
 and a percentage of equivalence among semantically equivalent/contained queries.
-The Query Generator then generates the queries using the following five-Step process: </p>
+The Query Generator then generates the queries using the following five-step process: </p>
 
-1. The Query Generator calculates the number of queries per source by dividing total number of queries by the number of sources.
-2. For each distinct source, the Query Generator calculates number of queries in each equivalent/contained query group.
+1. The Query Generator calculates the number of queries per source by dividing the total number of queries by the number of sources.
+2. For each distinct source, the Query Generator calculates the number of queries in each equivalent/contained query group.
 3. The generator computes semantically distinct queries based on the percentage of semantically distinct queries to generate for each group.
 4. The generator calculates the number of equivalent/contained queries to generate within the group.
-5. The generator based on the value of percentage of equivalence among semantically equivalent/contained queries generates the remaining queries in the group
+5. The generator, based on the value of the percentage of equivalence among semantically equivalent/contained queries, generates the remaining queries in the group
 
 ## Installation
 
-The [requirements.txt](requirements.txt) file should list all Python libraries that this project depend on, and they will be installed using
+The [requirements.txt](requirements.txt) file should list all Python libraries that this project depends on, and they will be installed using
 
 `pip install -r requirements.txt`
 
